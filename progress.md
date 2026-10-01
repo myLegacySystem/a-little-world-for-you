@@ -1,5 +1,28 @@
 # Progress — A little world, made for you
 
+## V2 — cinematic pass (latest)
+
+Built on top of the first version — same stack, content files, scroll director, timeline and anchors. What changed:
+
+**Story order** (`src/scenes/config.ts`): opening → color → **heart** (new, no words) → memories → eyes → fall (now ends by surfacing into stars) → quote (now an almost-white pause) → **response** (new: my words after the quote, in rose light) → soul → dreams → personal → birthday.
+
+**The world** (`three/timeline.ts`, `three/Atmosphere.ts`): new moods — `heartLight` (a soft pink light before the heart has a shape), `mist` (the quote's white pause), `rose` (warm pink for my own words and the personal wish), `ghost` (faint heart-shaped light in the personal wish), and camera travel: `dolly` (moving forward through the particles; rushes when she's "pulled into the sea") and `sink` (falling through the water; reversing it rises). Leaving the sea, the surface now sinks away below and we come up into the night sky. At the birthday, the stars become particles, the particles become light, and the heart re-forms.
+
+**The heart** is discovered: dust → pink light → particles gather → shape → glass forms → in its own scene we drift closer while it breathes → it dissolves into the sea → it reforms at the end, beside the final photograph.
+
+**Photographs in the world** (`three/Memories.ts`, `utils/photoAnchor.ts`): photos are now drawn by WebGL as real objects where their layout box is. They materialise from glowing specks, sit on cream print paper with grain and a soft shadow, float slightly and lean toward the pointer. Her eyes are seen through moving water and dissolve as we're pulled in. The DOM `<img>` stays (invisible) for alt text and as the fallback without WebGL. Textures load only near the screen and are disposed when removed.
+
+**Particles**: depth-of-field bokeh away from the heart's plane, travel with the camera, drift softly away from the mouse (desktop only), rose tints, stars that stay visible on light skies as tiny gold/rose lights.
+
+**Type**: the quote is "remembered" — each line focuses in as its letters settle; attribution is small and quiet. The birthday title is the largest type of the whole piece (`.t-hero`).
+
+**Mouse**: a faint light follows the pointer; particles part around it; photos tilt toward it; the heart sways with it. Nothing depends on it; touch devices simply scroll.
+
+**Validation**: `npm run typecheck`, `npm run lint`, `npm run build` pass. Full scroll walk in headless Chromium at 1280×800, 390×844 (touch) and reduced motion: no console errors (other than expected 404s for the two song files not yet added). Music: enter by keyboard, pause, next, missing-song fallback.
+
+---
+
+
 _Last updated: first polished iteration of the pastel redesign._
 
 ## Status

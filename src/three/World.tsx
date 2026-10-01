@@ -4,9 +4,11 @@ import { audioEngine } from '../audio/audioEngine';
 import { SCENES } from '../scenes/config';
 import { lite, reducedMotion, supportsWebGL } from '../utils/device';
 import { getHeartAnchor } from '../utils/heartAnchor';
+import { setWorldReady } from '../utils/photoAnchor';
 import { getJourney, onJourney } from '../utils/scroll';
 import { Atmosphere } from './Atmosphere';
 import { Heart } from './Heart';
+import { Memories } from './Memories';
 import { Particles } from './Particles';
 import { Petals } from './Petals';
 import { easeWorld, worldAt, type WorldState } from './timeline';
@@ -58,7 +60,9 @@ export function World() {
     const particles = new Particles(reducedMotion ? 1600 : lite ? 2600 : 5200);
     const petals = new Petals(lite ? 26 : 46);
     particles.uniforms.uPixelRatio.value = pixelRatio;
-    scene.add(heart.group, particles.points, petals.mesh);
+    const memories = new Memories();
+    scene.add(memories.group, heart.group, particles.points, petals.mesh);
+    setWorldReady(true);
 
     let width = 1;
     let height = 1;
@@ -78,10 +82,17 @@ export function World() {
     // Desktop only: the world leans very slightly towards the pointer.
     const pointer = new THREE.Vector2();
     const pointerTarget = new THREE.Vector2();
+    let pointerAmt = 0;
+    let pointerAmtGoal = 0;
     const onPointer = (e: PointerEvent) => {
       if (e.pointerType !== 'mouse') return;
       pointerTarget.set((e.clientX / width) * 2 - 1, -((e.clientY / height) * 2 - 1));
+      pointerAmtGoal = 1;
     };
+    const onLeave = () => {
+      pointerAmtGoal = 0;
+    };
+    if (!reducedMotion) document.documentElement.addEventListener('mouseleave', onLeave);
     if (!reducedMotion) window.addEventListener('pointermove', onPointer, { passive: true });
 
     const state: WorldState = worldAt(getJourney());
@@ -107,6 +118,14 @@ export function World() {
       const cy = -(((r.top + r.height / 2) / height) * 2 - 1);
       const halfH = visibleHeight / 2;
       return { x: cx * halfH * camera.aspect, y: cy * halfH, s: (r.height / height) * visibleHeight };
+    };
+    const screenToWorld = (x: number, y: number) => {
+      const halfH = visibleHeight / 2;
+      return {
+        x: ((x / width) * 2 - 1) * halfH * camera.aspect,
+        y: -((y / height) * 2 - 1) * halfH,
+        unit: visibleHeight / height,
+      };
     };
     const trackHeart = () => {
       const pos = getJourney();
@@ -145,6 +164,7 @@ export function World() {
 
       easeWorld(state, target, 1 - Math.exp(-dt * (reducedMotion ? 5 : 1.5)));
       pointer.lerp(pointerTarget, 1 - Math.exp(-dt * 1.2));
+      pointerAmt += (pointerAmtGoal - pointerAmt) * (1 - Math.exp(-dt * 1.5));
 
       trackHeart();
       // While the heart is invisible it simply waits where it will appear.
@@ -174,6 +194,14 @@ export function World() {
       pu.uBurst.value = state.burst;
       pu.uFinale.value = state.finale;
       pu.uDark.value = state.dark;
+      pu.uDolly.value = state.dolly;
+      pu.uSink.value = state.sink;
+      pu.uRose.value = state.rose;
+      pu.uMist.value = state.mist;
+      pu.uPointer.value.set(pointer.x * (visibleHeight / 2) * camera.aspect, pointer.y * (visibleHeight / 2), 0);
+      pu.uPointerAmt.value = pointerAmt;
+
+      memories.update(time, dt, pointer, height, screenToWorld);
 
       petals.uniforms.uTime.value = time;
       petals.uniforms.uAmount.value = state.petals;
@@ -195,6 +223,12 @@ export function World() {
       u.uHush.value = state.hush;
       u.uFinale.value = state.finale;
       u.uGlass.value = state.glass;
+      u.uHeartLight.value = state.heartLight;
+      u.uRose.value = state.rose;
+      u.uGhost.value = state.ghost;
+      u.uMist.value = state.mist;
+      u.uSink.value = state.sink;
+      u.uPointerLight.value = pointerAmt;
 
       // A gentle camera drift; in the sea, a slow sinking sway.
       camera.position.x = pointer.x * 0.22 + Math.sin(time * 0.05) * 0.12;
@@ -232,6 +266,7 @@ export function World() {
       e.preventDefault();
       cancelAnimationFrame(raf);
       running = false;
+      setWorldReady(false);
       setFallback(true);
     };
     renderer.domElement.addEventListener('webglcontextlost', onLost);
@@ -241,6 +276,9 @@ export function World() {
       offJourney();
       window.removeEventListener('resize', resize);
       window.removeEventListener('pointermove', onPointer);
+      document.documentElement.removeEventListener('mouseleave', onLeave);
+      setWorldReady(false);
+      memories.dispose();
       document.removeEventListener('visibilitychange', onVisibility);
       renderer.domElement.removeEventListener('webglcontextlost', onLost);
       atmosphere.dispose();
@@ -259,9 +297,9 @@ export function World() {
       const w = worldAt(pos);
       const mix = (base: number, ...pairs: [number, number][]) =>
         Math.round(pairs.reduce((v, [weight, c]) => v + (c - v) * weight, base));
-      const r = mix(240, [w.color, 252], [w.ocean, 40], [w.night, 40], [w.warm, 255], [w.hush, 246], [w.finale, 253]);
-      const g = mix(240, [w.color, 236], [w.ocean, 120], [w.night, 46], [w.warm, 244], [w.hush, 238], [w.finale, 240]);
-      const b = mix(240, [w.color, 240], [w.ocean, 180], [w.night, 100], [w.warm, 230], [w.hush, 246], [w.finale, 238]);
+      const r = mix(240, [w.color, 252], [w.ocean, 40], [w.night, 40], [w.mist, 255], [w.rose, 252], [w.warm, 255], [w.hush, 246], [w.finale, 253]);
+      const g = mix(240, [w.color, 236], [w.ocean, 120], [w.night, 46], [w.mist, 251], [w.rose, 226], [w.warm, 244], [w.hush, 238], [w.finale, 240]);
+      const b = mix(240, [w.color, 240], [w.ocean, 180], [w.night, 100], [w.mist, 248], [w.rose, 232], [w.warm, 230], [w.hush, 246], [w.finale, 238]);
       ref.current?.style.setProperty('background-color', `rgb(${r}, ${g}, ${b})`);
       document.documentElement.style.setProperty('--dark', w.dark.toFixed(3));
     });

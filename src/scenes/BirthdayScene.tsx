@@ -26,8 +26,8 @@ export function BirthdayScene() {
 
 function BirthdayStage() {
   const p = useSceneProgress();
-  const photo = ramp(p, 0.06, 0.2);
-  const titleOn = p >= 0.15;
+  const photo = ramp(p, 0.14, 0.3);
+  const titleOn = p >= 0.2;
   const titleLines = TEXT.BIRTHDAY_TITLE.split('\n').length;
   return (
     <div className="birthday">
@@ -36,16 +36,17 @@ function BirthdayStage() {
           photo={PHOTOS.PHOTO_05}
           visible={photo}
           className="birthday__photo"
-          style={{ transform: `translate3d(0, ${(1 - photo) * 5}vh, 0) rotate(-2.5deg)` }}
+          style={{ transform: `translate3d(0, ${(1 - photo) * 5}vh, 0)` }}
+          tilt={-2.5}
         />
-        <Botanical kind="stem" on={p > 0.16} className="birthday__stem" />
+        <Botanical kind="stem" on={p > 0.24} className="birthday__stem" />
         <HeartAnchor className="birthday__heart" />
       </div>
       <div className="birthday__words">
         <div>
-          <Reveal text={TEXT.BIRTHDAY_EYEBROW} at={0.13} className="t-label" />
+          <Reveal text={TEXT.BIRTHDAY_EYEBROW} at={0.19} className="t-label" />
           {/* "Happy Birthday" stays; the name after it takes turns. */}
-          <h1 className={`reveal reveal--${titleOn ? 'on' : 'before'} t-display birthday__title`}>
+          <h1 className={`reveal reveal--${titleOn ? 'on' : 'before'} t-hero birthday__title`}>
             <Words text={TEXT.BIRTHDAY_TITLE} />
             <span className="w-line birthday__name" style={{ '--i': titleLines } as CSSProperties}>
               <NameFlip
@@ -62,20 +63,20 @@ function BirthdayStage() {
         </div>
         <div className="stack birthday__lines">
           <div>
-            <Reveal text={TEXT.BIRTHDAY_INTRO_01} at={0.25} out={0.39} className="t-medium" />
-            <Reveal text={TEXT.BIRTHDAY_INTRO_02} at={0.3} out={0.39} className="t-small" />
+            <Reveal text={TEXT.BIRTHDAY_INTRO_01} at={0.32} out={0.45} className="t-medium" />
+            <Reveal text={TEXT.BIRTHDAY_INTRO_02} at={0.36} out={0.45} className="t-small" />
           </div>
           <div className="birthday__hopes">
-            <Reveal text={TEXT.BIRTHDAY_01} at={0.41} out={0.58} className="t-small" />
-            <Reveal text={TEXT.BIRTHDAY_02} at={0.45} out={0.58} className="t-small" />
-            <Reveal text={TEXT.BIRTHDAY_03} at={0.49} out={0.58} className="t-small" />
+            <Reveal text={TEXT.BIRTHDAY_01} at={0.47} out={0.62} className="t-small" />
+            <Reveal text={TEXT.BIRTHDAY_02} at={0.5} out={0.62} className="t-small" />
+            <Reveal text={TEXT.BIRTHDAY_03} at={0.53} out={0.62} className="t-small" />
           </div>
           <div className="birthday__hopes">
-            <Reveal text={TEXT.BIRTHDAY_04} at={0.6} out={0.78} className="t-small" />
-            <Reveal text={TEXT.BIRTHDAY_05} at={0.64} out={0.78} className="t-small" />
-            <Reveal text={TEXT.BIRTHDAY_06} at={0.68} out={0.78} className="t-small" />
+            <Reveal text={TEXT.BIRTHDAY_04} at={0.64} out={0.79} className="t-small" />
+            <Reveal text={TEXT.BIRTHDAY_05} at={0.67} out={0.79} className="t-small" />
+            <Reveal text={TEXT.BIRTHDAY_06} at={0.7} out={0.79} className="t-small" />
           </div>
-          <Reveal text={TEXT.FINAL} at={0.8} className="t-medium birthday__thanks" />
+          <Reveal text={TEXT.FINAL} at={0.82} className="t-medium birthday__thanks" />
         </div>
       </div>
     </div>

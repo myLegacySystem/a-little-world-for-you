@@ -26,14 +26,16 @@ function MemoriesStage() {
         visible={a}
         caption={TEXT.MEMORIES_CAPTION_01}
         className="memories__one"
-        style={{ transform: `translate3d(0, ${(1 - a) * 6 + (0.5 - p) * 3}vh, 0) rotate(-3deg)` }}
+        style={{ transform: `translate3d(0, ${(1 - a) * 6 + (0.5 - p) * 3}vh, 0)` }}
+        tilt={-3}
       />
       <Photo
         photo={PHOTOS.PHOTO_02}
         visible={b}
         caption={TEXT.MEMORIES_CAPTION_02}
         className="memories__two"
-        style={{ transform: `translate3d(0, ${(1 - b) * 8 + (0.5 - p) * 7}vh, 0) rotate(4deg)` }}
+        style={{ transform: `translate3d(0, ${(1 - b) * 8 + (0.5 - p) * 7}vh, 0)` }}
+        tilt={4}
       />
       <HeartAnchor className="memories__heart" />
       <Reveal text={TEXT.MEMORIES_01} at={0.42} className="t-medium memories__words" />
