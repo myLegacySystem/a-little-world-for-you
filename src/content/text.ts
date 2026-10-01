@@ -129,10 +129,12 @@ export const TEXT = {
   // ── Names of each part, for screen readers ──────────────────────────────
   LABEL_OPENING: 'Before',
   LABEL_COLOR: 'Color',
+  LABEL_HEART: 'A heart',
   LABEL_MEMORIES: 'Memories',
   LABEL_EYES: 'Your eyes',
   LABEL_FALL: 'The sea',
   LABEL_QUOTE: 'A quote',
+  LABEL_RESPONSE: 'What I thought',
   LABEL_DREAMS: 'Dreams',
   LABEL_SOUL: 'Your soul',
   LABEL_PERSONAL: 'One wish',

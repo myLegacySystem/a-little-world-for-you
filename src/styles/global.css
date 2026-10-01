@@ -794,23 +794,114 @@ em {
 }
 
 .quote__credit {
-  color: rgba(255, 249, 245, 0.66);
+  margin-top: clamp(1rem, 4svh, 2.4rem);
+  text-align: center;
+  color: rgba(107, 82, 96, 0.55);
+  letter-spacing: 0.32em;
 }
 
 .quote__credit em {
-  color: rgba(255, 249, 245, 0.92);
+  font-style: normal;
+  color: rgba(107, 82, 96, 0.72);
 }
 
-.quote__after {
+.quote .t-quote {
+  --ink: #4a4f63;
+  font-weight: 300;
+}
+
+/* The quote's lines are prose, not designed breaks: let them wrap. */
+.quote .w-line {
+  white-space: normal;
+}
+
+/* Remembered: each line comes into focus, its letters settling closer. */
+.remembered .w-line {
+  transition:
+    opacity 2.4s var(--ease),
+    filter 2.6s var(--ease),
+    letter-spacing 3.2s var(--ease),
+    transform 2.4s var(--ease);
+}
+
+.remembered.reveal--before .w-line {
+  letter-spacing: 0.14em;
+  filter: blur(10px);
+  transform: none;
+}
+
+.remembered.reveal--on .w-line {
+  letter-spacing: 0;
+}
+
+/* ---------- Response (my own words) ---------- */
+
+.response {
+  display: grid;
+  padding: var(--gutter);
+  --accent: #c27792;
+}
+
+.response__words {
   align-self: center;
   justify-self: start;
-  margin-left: 4vw;
-  max-width: 36rem;
+  margin-left: 6vw;
+  max-width: 44rem;
 }
 
-.quote__pair {
+.response__pair {
   display: grid;
-  gap: 0.8rem;
+  gap: clamp(0.6rem, 2svh, 1.2rem);
+}
+
+.response__pair--last {
+  justify-self: end;
+  text-align: right;
+  margin-right: 4vw;
+}
+
+.response .t-small {
+  font-style: italic;
+}
+
+/* ---------- The heart (no words) ---------- */
+
+.heart-stage {
+  --near: 0;
+  position: relative;
+}
+
+.heart-stage__heart {
+  position: absolute;
+  left: 50%;
+  top: 48%;
+  width: min(calc(30svh + var(--near) * 20svh), 84vw);
+  height: min(calc(30svh + var(--near) * 20svh), 84vw);
+  translate: -50% -50%;
+}
+
+/* ---------- Hero type: the biggest moment ---------- */
+
+.t-hero {
+  margin: 0;
+  font-weight: 300;
+  font-size: clamp(3rem, 1.3rem + 5.4vw, 7.4rem);
+  line-height: 0.94;
+  letter-spacing: -0.02em;
+}
+
+/* ---------- Photographs drawn by the world ---------- */
+
+/* The WebGL world draws the photographs; the page keeps their place and alt. */
+.has-world .photo__frame img,
+.has-world .photo__frame::after,
+.has-world .photo__frame::before {
+  opacity: 0;
+}
+
+.has-world .photo--print .photo__frame {
+  background: none;
+  box-shadow: none;
 }
 
 /* ---------- Dreams ---------- */
@@ -1152,8 +1243,9 @@ em {
     width: min(24vw, 50svh);
   }
   .birthday__heart {
-    right: -50%;
-    top: -26%;
+    right: auto;
+    left: -34%;
+    top: -22%;
     width: 27svh;
     height: 27svh;
   }
@@ -1366,8 +1458,11 @@ em {
   .fall__two {
     right: 7vw;
   }
-  .quote__after {
+  .response__words {
     margin-left: 0;
+  }
+  .response__pair--last {
+    margin-right: 0;
   }
   .thread {
     right: 6px;

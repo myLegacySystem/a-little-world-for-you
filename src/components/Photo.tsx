@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import type { Photo as PhotoData } from '../content/photos';
 import { getPhotoUrl } from '../utils/assets';
+import { removeWorldPhoto, setWorldPhoto } from '../utils/photoAnchor';
 
 type Variant = 'print' | 'cinema' | 'soft';
 
@@ -13,6 +14,8 @@ interface PhotoProps {
   caption?: string;
   className?: string;
   style?: CSSProperties;
+  /** Tilt in degrees, shared by the page layout and the 3D print. */
+  tilt?: number;
 }
 
 /**
@@ -21,9 +24,29 @@ interface PhotoProps {
  *   cinema — a wide, edge-faded crop that fills the frame
  *   soft   — a floating portrait with dissolving edges
  * It rises out of soft focus as it arrives and only loads when it's near.
+ *
+ * When WebGL is running, the photograph is drawn inside the 3D world instead
+ * (see three/Memories.ts): it materialises from specks of light and floats in
+ * depth. This element then keeps only its place in the layout and the alt text.
  */
-export function Photo({ photo, visible, variant = 'print', caption, className = '', style }: PhotoProps) {
+export function Photo({ photo, visible, variant = 'print', caption, className = '', style, tilt = 0 }: PhotoProps) {
   const ref = useRef<HTMLElement>(null);
+  const frame = useRef<HTMLDivElement>(null);
+  const key = `${photo.id}:${variant}`;
+
+  useEffect(() => {
+    if (!frame.current || variant === 'soft') return;
+    setWorldPhoto({
+      key,
+      el: frame.current,
+      url: getPhotoUrl(photo),
+      mode: variant === 'cinema' ? 'water' : 'print',
+      visible: Math.min(1, Math.max(0, visible)),
+      tilt,
+    });
+  }, [key, photo, variant, visible, tilt]);
+
+  useEffect(() => () => removeWorldPhoto(key), [key]);
   const [near, setNear] = useState(false);
   const [loaded, setLoaded] = useState(false);
 
@@ -42,15 +65,16 @@ export function Photo({ photo, visible, variant = 'print', caption, className = 
     <figure
       ref={ref}
       className={`photo photo--${variant} ${className}`}
-      style={{ ...style, '--v': v } as CSSProperties}
+      style={{ ...style, rotate: tilt ? `${tilt}deg` : undefined, '--v': v } as CSSProperties}
       aria-hidden={v < 0.4}
     >
-      <div className="photo__frame">
+      <div className="photo__frame" ref={frame}>
         {near && (
           <img
             src={getPhotoUrl(photo)}
             alt={photo.alt}
             decoding="async"
+            crossOrigin="anonymous"
             draggable={false}
             style={{ objectPosition: photo.focus }}
             onLoad={() => setLoaded(true)}

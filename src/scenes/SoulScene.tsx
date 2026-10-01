@@ -26,7 +26,8 @@ function SoulStage() {
           photo={PHOTOS.PHOTO_04}
           visible={photo}
           className="soul__photo"
-          style={{ transform: `translate3d(0, ${(1 - photo) * 5 + (0.5 - p) * 4}vh, 0) rotate(2.5deg)` }}
+          style={{ transform: `translate3d(0, ${(1 - photo) * 5 + (0.5 - p) * 4}vh, 0)` }}
+          tilt={2.5}
         />
       </div>
       <div className="stack soul__words">

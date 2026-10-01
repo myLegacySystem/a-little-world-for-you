@@ -36,6 +36,12 @@ uniform float uWarm;
 uniform float uHush;
 uniform float uFinale;
 uniform float uGlass;
+uniform float uHeartLight;
+uniform float uRose;
+uniform float uGhost;
+uniform float uMist;
+uniform float uSink;
+uniform float uPointerLight;
 
 ${noise}
 ${ocean}
@@ -48,6 +54,7 @@ const vec3 ROSE   = vec3(0.937, 0.663, 0.753); // #EFA9C0
 const vec3 LAV    = vec3(0.863, 0.812, 0.961); // #DCCFF5
 const vec3 BUTTER = vec3(1.0, 0.941, 0.780);   // #FFF0C7
 const vec3 MINT   = vec3(0.804, 0.922, 0.867); // #CDEBDD
+const vec3 PETAL  = vec3(1.0, 0.839, 0.886);   // #FFD6E2
 
 vec2 aspectP(vec2 uv) { return vec2((uv.x - 0.5) * uAspect, uv.y - 0.5); }
 
@@ -78,11 +85,33 @@ vec3 watercolor(vec3 col, vec2 p, vec2 heart, float c, float t) {
   return col;
 }
 
+// The night sky: deep soft blue overhead, lavender and blush at the horizon,
+// a slow pastel nebula. Expansive, never frightening.
+vec3 nightSky(vec2 uv, vec2 p, float t) {
+  vec3 n = mix(vec3(0.97, 0.78, 0.85), vec3(0.76, 0.69, 0.92), smoothstep(0.0, 0.22, uv.y));
+  n = mix(n, vec3(0.30, 0.33, 0.62), smoothstep(0.18, 0.62, uv.y));
+  n = mix(n, vec3(0.11, 0.14, 0.34), smoothstep(0.58, 1.05, uv.y));
+  float neb = fbm(p * 1.2 + vec2(t * 0.005, -t * 0.003));
+  float neb2 = fbm(p * 2.3 - vec2(t * 0.004, 0.0) + 4.0);
+  n += LAV * pow(neb, 2.6) * 0.32 * smoothstep(0.15, 0.85, uv.y);
+  n += ROSE * pow(neb2, 3.5) * 0.22 * smoothstep(0.1, 0.6, uv.y);
+  n += BABY * pow(neb * neb2, 2.0) * 0.18 * smoothstep(0.4, 1.0, uv.y);
+  return n;
+}
+
+// Taubin's heart in 2D: negative inside.
+float heart2d(vec2 q) {
+  q.y -= 0.1;
+  float a = q.x * q.x + q.y * q.y - 1.0;
+  return a * a * a - q.x * q.x * q.y * q.y * q.y;
+}
+
 void main() {
   vec2 uv = vUv;
   vec2 p = aspectP(uv);
   vec2 heart = aspectP(uHeartUv);
   float t = uTime;
+  float dh = length(p - heart);
 
   // 1. Before: pale, almost colorless paper with a slow mist.
   vec3 paper = mix(vec3(0.945, 0.945, 0.94), vec3(0.925, 0.937, 0.95), uv.y);
@@ -91,30 +120,31 @@ void main() {
 
   // 2. Color arrives as watercolor, blooming out from the heart.
   col = watercolor(col, p, heart, uColor, t);
+
+  // The first soft pink light — before there is any heart to see.
+  float bloom = exp(-dh * dh * (2.5 + 10.0 * (1.0 - uHeartLight)));
+  col = mix(col, mix(PETAL, CREAM, 0.35), bloom * uHeartLight * 0.55);
+  col += vec3(1.0, 0.93, 0.95) * exp(-dh * dh * 14.0) * uHeartLight * 0.18;
   // Warm light around the heart once it's there.
-  float dh = length(p - heart);
   col += vec3(1.0, 0.93, 0.9) * exp(-dh * dh * 6.0) * uGlass * 0.12;
 
-  // 3. The sea, rising from below until it's everywhere.
+  vec3 night = uNight > 0.001 ? nightSky(uv, p, t) : vec3(0.0);
+
+  // 3. The sea. Entering, it rises from below until it's everywhere; leaving,
+  //    the surface sinks away below us and we come up into the night sky.
+  float under = 0.0;
   if (uOcean > 0.001) {
     float line = mix(-0.12, 1.22, uOcean) + sin(p.x * 3.2 + t * 0.7) * 0.012 + (fbm(vec2(p.x * 2.0, t * 0.1)) - 0.5) * 0.05;
-    float under = smoothstep(line + 0.012, line - 0.012, uv.y);
-    // Above the water, the air turns to soft sky blue.
+    under = smoothstep(line + 0.012, line - 0.012, uv.y);
     vec3 air = mix(col, mix(BABY, CREAM, smoothstep(0.4, 1.0, uv.y) * 0.5), smoothstep(0.0, 0.5, uOcean) * 0.7);
-    vec3 sea = oceanColor(uv, p, t, uDepth, uSparkle, uPointer);
+    air = mix(air, night, uNight);
+    vec3 sea = oceanColor(uv + vec2(0.0, uSink * 0.02), p, t, uDepth, uSparkle, uPointer);
     col = mix(air, sea, under);
-    // The bright meniscus where the surface is.
     col += vec3(1.0) * exp(-abs(uv.y - line) * 140.0) * 0.35 * step(0.001, uOcean) * step(uOcean, 0.999);
   }
 
-  // 4. Twilight: the sea has become sky.
-  if (uNight > 0.001) {
-    vec3 n = mix(vec3(0.95, 0.75, 0.82), vec3(0.72, 0.65, 0.88), smoothstep(0.0, 0.22, uv.y));
-    n = mix(n, vec3(0.26, 0.29, 0.56), smoothstep(0.18, 0.6, uv.y));
-    n = mix(n, vec3(0.10, 0.13, 0.32), smoothstep(0.55, 1.0, uv.y));
-    n += LAV * pow(fbm(p * 1.3 + vec2(t * 0.004, 0.0)), 3.0) * 0.18 * smoothstep(0.2, 0.8, uv.y);
-    col = mix(col, n, uNight);
-  }
+  // 4. Night, wherever there isn't water.
+  if (uNight > 0.001) col = mix(col, night, uNight * (1.0 - under));
 
   // 5. Warm light: dawn cream, buttercream sun, blush pooling.
   if (uWarm > 0.001) {
@@ -129,14 +159,48 @@ void main() {
     col = mix(col, w, uWarm);
   }
 
-  // 6. Hush: a pale lavender morning, very still.
+  // 6. Rose: my own words — warmer, pinker light than anywhere else.
+  if (uRose > 0.001) {
+    vec3 r = mix(mix(BLUSH, CREAM, 0.45), CREAM, smoothstep(0.0, 1.0, uv.y));
+    vec2 c1 = vec2(-0.25 * uAspect + 0.05 * sin(t * 0.06), 0.05 + 0.04 * cos(t * 0.05));
+    r = mix(r, PETAL, exp(-length(p - c1) * 1.6) * 0.75);
+    r = mix(r, BUTTER, exp(-length(p - vec2(0.45 * uAspect, 0.35)) * 2.4) * 0.5);
+    r += vec3(1.0, 0.9, 0.92) * exp(-length(p - c1) * 4.0) * 0.08;
+    r += (fbm(p * 1.8 - t * 0.015) - 0.5) * 0.03;
+    col = mix(col, r, uRose);
+  }
+
+  // 7. Hush: a pale lavender morning, very still.
   if (uHush > 0.001) {
     vec3 h = mix(vec3(0.99, 0.94, 0.95), vec3(0.94, 0.92, 0.98), uv.y);
     h += (fbm(p * 1.2 + t * 0.006) - 0.5) * 0.02;
     col = mix(col, h, uHush * 0.85);
   }
 
-  // 7. Finale: every color the story gathered, around the heart.
+  // 8. Faint heart-shaped light, as if the world remembers it.
+  if (uGhost > 0.001) {
+    float s = 0.42 + 0.015 * sin(t * 0.9);
+    float f = heart2d((p - heart) / s);
+    float halo = exp(-abs(f) * 9.0) * 0.6 + exp(-max(f, 0.0) * 2.0) * 0.12 * step(f, 4.0);
+    col = mix(col, PETAL, clamp(halo, 0.0, 1.0) * uGhost * 0.45);
+    // A few small ones drifting up, very faint.
+    for (int i = 0; i < 3; i++) {
+      float fi = float(i);
+      vec2 c = vec2((fi - 1.0) * 0.55 * uAspect + 0.1 * sin(t * 0.07 + fi * 2.0), mod(t * 0.02 + fi * 0.37, 1.3) - 0.65);
+      float g = heart2d((p - c) / (0.05 + 0.02 * fi));
+      col = mix(col, ROSE, exp(-abs(g) * 6.0) * 0.25 * uGhost * smoothstep(0.65, 0.2, abs(c.y)));
+    }
+  }
+
+  // 9. Mist: a quiet, almost white pause — for someone else's words.
+  if (uMist > 0.001) {
+    vec3 m = mix(vec3(1.0, 0.985, 0.975), vec3(0.985, 0.98, 0.99), uv.y);
+    m -= 0.03 * pow(length(uv - 0.5) * 1.4, 2.0);
+    m += (fbm(p * 0.9 + t * 0.004) - 0.5) * 0.015;
+    col = mix(col, m, uMist);
+  }
+
+  // 10. Finale: every color the story gathered, around the heart.
   if (uFinale > 0.001) {
     vec3 f = mix(CREAM, mix(BABY, CREAM, 0.4), smoothstep(0.3, 1.0, uv.y));
     f = watercolor(f, p * 0.85, heart * 0.85, 0.95 + 0.04 * sin(t * 0.1), t * 0.6);
@@ -147,6 +211,10 @@ void main() {
     f += vec3(1.0, 0.86, 0.62) * twinkles(p, t, smoothstep(0.55, 1.0, uv.y)) * 0.55;
     col = mix(col, f, uFinale);
   }
+
+  // The world leans toward her: a soft light where the pointer rests.
+  vec2 pp = vec2(uPointer.x * 0.5 * uAspect, uPointer.y * 0.5);
+  col += vec3(1.0, 0.97, 0.95) * exp(-dot(p - pp, p - pp) * 9.0) * uPointerLight * 0.05;
 
   // Soft vignette + a whisper of grain, like printed paper.
   col *= 1.0 - 0.07 * pow(length(uv - 0.5) * 1.3, 2.0);
@@ -171,6 +239,12 @@ export class Atmosphere {
     uHush: { value: 0 },
     uFinale: { value: 0 },
     uGlass: { value: 0 },
+    uHeartLight: { value: 0 },
+    uRose: { value: 0 },
+    uGhost: { value: 0 },
+    uMist: { value: 0 },
+    uSink: { value: 0 },
+    uPointerLight: { value: 0 },
   };
 
   constructor() {

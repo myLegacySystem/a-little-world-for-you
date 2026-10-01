@@ -5,15 +5,17 @@
  */
 export const SCENES = [
   { id: 'opening', length: 3.2 },
-  { id: 'color', length: 3.8 },
-  { id: 'memories', length: 3.4 },
+  { id: 'color', length: 3.6 },
+  { id: 'heart', length: 3.2 },
+  { id: 'memories', length: 3.6 },
   { id: 'eyes', length: 4.8 },
-  { id: 'fall', length: 3.2 },
-  { id: 'quote', length: 6.2 },
-  { id: 'dreams', length: 4.4 },
-  { id: 'soul', length: 5.2 },
+  { id: 'fall', length: 4.6 },
+  { id: 'quote', length: 5.4 },
+  { id: 'response', length: 4 },
+  { id: 'soul', length: 5 },
+  { id: 'dreams', length: 4.2 },
   { id: 'personal', length: 4.8 },
-  { id: 'birthday', length: 6.6 },
+  { id: 'birthday', length: 7 },
 ] as const;
 
 export type SceneId = (typeof SCENES)[number]['id'];

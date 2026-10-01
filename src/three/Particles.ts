@@ -36,6 +36,12 @@ uniform float uHush;
 uniform float uBurst;
 uniform float uFinale;
 uniform float uDark;
+uniform float uDolly;
+uniform float uSink;
+uniform float uRose;
+uniform float uMist;
+uniform vec3 uPointer;
+uniform float uPointerAmt;
 
 varying vec3 vColor;
 varying float vAlpha;
@@ -63,6 +69,8 @@ void main() {
   amb.y = mod(amb.y + t * (0.025 + 0.045 * aSeed.y) + 7.0, 14.0) - 7.0;
   amb.x += sin(t * (0.08 + 0.12 * aSeed.z) + aSeed.w * 6.283) * 0.35;
   amb.z += cos(t * (0.07 + 0.09 * aSeed.y) + s * 6.283) * 0.25;
+  // Travelling forward through the dust (the camera moving in).
+  amb.z = mod(amb.z + uDolly + 12.0, 14.0) - 12.0;
 
   // Heart: a point on the shape, shimmering very slightly.
   vec3 hp = aHeart * (1.0 + 0.025 * sin(t * 1.6 + s * 40.0));
@@ -70,7 +78,9 @@ void main() {
 
   // Sea: suspended in the water, rising — faster as we sink deeper.
   vec3 sea = aSea;
-  sea.y = mod(sea.y + t * (0.05 + 0.1 * aSeed.y) * (1.0 + uDepth * 1.6) + 6.0, 12.0) - 6.0;
+  // Sinking: the water streams past upward as we fall; pulled in, it streams toward us.
+  sea.y = mod(sea.y + t * (0.05 + 0.1 * aSeed.y) * (1.0 + uDepth * 1.6) + uSink + 6.0, 12.0) - 6.0;
+  sea.z = mod(sea.z + uDolly * 1.4 + 9.0, 11.0) - 9.0;
   sea.x += sin(t * 0.18 + s * 30.0) * 0.3;
 
   // Sky: fixed stars, the slowest drift.
@@ -93,6 +103,11 @@ void main() {
   p = mix(p, sky, k);
   p.y += rising * 1.5 * (1.0 - aSeed.y);
 
+  // The world responds to her: particles drift softly away from the pointer.
+  vec2 away = p.xy - uPointer.xy;
+  float near = exp(-dot(away, away) * 2.2) * uPointerAmt * (1.0 - h * 0.85) * (1.0 - k);
+  p.xy += normalize(away + vec2(1e-4)) * near * 0.28;
+
   vec4 mv = modelViewMatrix * vec4(p, 1.0);
   gl_Position = projectionMatrix * mv;
 
@@ -102,6 +117,9 @@ void main() {
   size = mix(size, (0.55 + aSeed.w * 0.9) * persp, h);
   size = mix(size, (0.9 + aSeed.w * 1.8) * persp, o);
   size = mix(size, 1.6 + pow(aSeed.w, 4.0) * 4.0, k);
+  // Depth of field: dust far from the heart's plane softens into bokeh.
+  float blur = clamp(abs(p.z) / 5.0, 0.0, 1.0) * (1.0 - k) * (1.0 - h);
+  size *= 1.0 + blur * 1.8;
   gl_PointSize = size * uPixelRatio * uSize;
 
   // Color.
@@ -112,7 +130,10 @@ void main() {
   col = mix(col, mix(grey, heartCol, max(uColor, 0.35)), h);
   col = mix(col, vec3(0.84, 0.95, 1.0), o);
   col = mix(col, aSeed.w > 0.85 ? vec3(1.0, 0.88, 0.72) : vec3(1.0, 0.98, 0.93), k);
+  // Stars on a light sky turn to small gold and rose lights so they still read.
+  col = mix(col, aSeed.z < 0.5 ? vec3(0.98, 0.72, 0.62) : vec3(0.93, 0.62, 0.72), k * (1.0 - uDark));
   col = mix(col, vec3(0.99, 0.82, 0.55), uWarm * (1.0 - h) * (1.0 - k));
+  col = mix(col, aSeed.y < 0.7 ? vec3(0.96, 0.62, 0.74) : vec3(1.0, 0.8, 0.62), uRose * (1.0 - h) * (1.0 - k));
   vColor = col;
 
   // Opacity.
@@ -122,6 +143,8 @@ void main() {
   a = mix(a, 0.65, o);
   a = mix(a, tw, k);
   a *= 1.0 - uHush * 0.75 * (1.0 - h);
+  a *= 1.0 - uMist * 0.85 * (1.0 - h);
+  a *= 1.0 - blur * 0.5;
   // Fade dust with distance (not stars — they're meant to be far).
   a *= mix(smoothstep(-32.0, -6.0, mv.z), 1.0, k) * smoothstep(-0.4, -1.8, mv.z);
   vAlpha = a;
@@ -163,6 +186,12 @@ export class Particles {
     uBurst: { value: 0 },
     uFinale: { value: 0 },
     uDark: { value: 0 },
+    uDolly: { value: 0 },
+    uSink: { value: 0 },
+    uRose: { value: 0 },
+    uMist: { value: 0 },
+    uPointer: { value: new THREE.Vector3(99, 99, 0) },
+    uPointerAmt: { value: 0 },
   };
 
   constructor(count: number) {
