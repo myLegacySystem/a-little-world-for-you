@@ -217,7 +217,7 @@ to `.gitignore`.
 The existing application should already have abstractions such as:
 
 ```ts
-getImageUrl(photo)
+getPhotoUrl(photo)
 getSongUrl(song)
 ```
 

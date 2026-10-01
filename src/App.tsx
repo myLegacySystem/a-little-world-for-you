@@ -1,32 +1,38 @@
-import { MusicPlayer } from './components/audio/MusicPlayer';
-import { World } from './components/effects/World';
-import { BirthdayScene } from './components/scenes/BirthdayScene';
-import { ColorScene } from './components/scenes/ColorScene';
-import { IntroScene } from './components/scenes/IntroScene';
-import { OceanScene } from './components/scenes/OceanScene';
-import { PersonalScene } from './components/scenes/PersonalScene';
-import { QuoteScene } from './components/scenes/QuoteScene';
-import { SoulScene } from './components/scenes/SoulScene';
-import { WishesScene } from './components/scenes/WishesScene';
-import { ProgressIndicator } from './components/ui/ProgressIndicator';
+import { IntroGate } from './components/IntroGate';
+import { MusicControl } from './components/MusicControl';
+import { Thread } from './components/Thread';
+import { BirthdayScene } from './scenes/BirthdayScene';
+import { ColorScene } from './scenes/ColorScene';
+import { DreamsScene } from './scenes/DreamsScene';
+import { EyesScene } from './scenes/EyesScene';
+import { FallScene } from './scenes/FallScene';
+import { MemoriesScene } from './scenes/MemoriesScene';
+import { OpeningScene } from './scenes/OpeningScene';
+import { PersonalScene } from './scenes/PersonalScene';
+import { QuoteScene } from './scenes/QuoteScene';
+import { SoulScene } from './scenes/SoulScene';
+import { World } from './three/World';
 
-/** One continuous journey. Order must match `sceneOrder` in lib/world.ts. */
+/** One continuous journey. Order must match SCENES in scenes/config.ts. */
 export function App() {
   return (
     <>
       <World />
       <main className="journey">
-        <IntroScene />
+        <OpeningScene />
         <ColorScene />
-        <OceanScene />
+        <MemoriesScene />
+        <EyesScene />
+        <FallScene />
         <QuoteScene />
+        <DreamsScene />
         <SoulScene />
-        <WishesScene />
         <PersonalScene />
         <BirthdayScene />
       </main>
-      <ProgressIndicator />
-      <MusicPlayer />
+      <Thread />
+      <MusicControl />
+      <IntroGate />
     </>
   );
 }
