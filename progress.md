@@ -22,7 +22,7 @@ Placeholder photos and songs are in use. Real ones can be dropped in without tou
 | 7 | `DreamsScene` | Night sky; each wish lights a star in a small constellation. |
 | 8 | `SoulScene` | Dawn: cream, buttercream sun, blush; petals drift; a hand-drawn sprig draws itself. |
 | 9 | `PersonalScene` | The quietest moment: pale lavender morning. At "close to my heart too" the particles begin to gather again. |
-| 10 | `BirthdayScene` | **Wow 5:** the heart reforms, larger and clearer than before, beside the final photograph, among every color of the story. It stays: the page ends here and the world keeps breathing. |
+| 10 | `BirthdayScene` | **Wow 5:** the heart reforms, larger and clearer than before, beside the final photograph, among every color of the story. "Happy Birthday" stays while her names take turns beneath it (MadamJi → Purnpoli → Ukdicha Modak → Kaju Katli), each with a small 🩷 at the end. It stays: the page ends here and the world keeps breathing. |
 
 ## Project structure
 
@@ -76,7 +76,8 @@ Add `?debug` to the URL to expose the live world state as `window.__world` in th
 
 - **Text:** `src/content/text.ts` holds every visible string, as a typed `as const` object. Change `TEXT.BIRTHDAY_TITLE` and the title changes everywhere; no other file needs editing. Formatting conventions inside strings: `\n` = a designed line break, `*words*` = italics, a trailing `🩷` is drawn as a small soft pink heart. The page `<title>` and `<noscript>` message are injected into `index.html` at build time from `TEXT.PAGE_TITLE` and `TEXT.NO_JAVASCRIPT`. Empty strings hide a line (e.g. `BIRTHDAY_EYEBROW`).
 - **Photos:** `src/content/photos.ts`. Components only ever call `getPhotoUrl(photo)` (`src/utils/assets.ts`). Alt text comes from `TEXT.PHOTO_0X_ALT`.
-- **Songs:** `src/content/songs.ts`. The audio engine only calls `getSongUrl(song)`. Order is `PLAYLIST`.
+- **Names:** `TEXT.BIRTHDAY_NAMES` — the names that flip after `TEXT.BIRTHDAY_TITLE`. Add, remove or reorder; one name stays still, none shows just the title.
+- **Songs:** `src/content/songs.ts`. The audio engine only calls `getSongUrl(song)`. `PLAYLIST` is "Perfect" (Ed Sheeran) and "I Wanna Be Yours" (Arctic Monkeys), expected at `public/assets/music/perfect.mp3` and `i-wanna-be-yours.mp3`. Any song whose file is missing is skipped; if none can play, `FALLBACK_PLAYLIST` (the placeholder piano) plays instead.
 - **Story timing:** when each line appears is in its scene file (`at` / `out` = scene progress 0–1). What the world looks like at each moment is in `src/three/timeline.ts`. Scene lengths are in `src/scenes/config.ts`.
 
 ## Replacing placeholders
@@ -91,7 +92,9 @@ Add `?debug` to the URL to expose the live world state as `window.__world` in th
 
 Portrait 4:5 works best; about 1200–1600px on the long edge, JPEG quality ~80. Use `focus` in `photos.ts` (CSS `object-position`) to keep the important part in frame.
 
-Songs: replace `public/assets/music/song-0X.mp3` (or add entries), then edit titles in `songs.ts`.
+Songs: add `perfect.mp3` and `i-wanna-be-yours.mp3` to `public/assets/music/` — they play automatically, first in order. More songs: add an entry in `songs.ts` and to `PLAYLIST`. Once the real songs are in, the placeholder pieces (`song-01…04.mp3`, `PLACEHOLDER_*`, `FALLBACK_PLAYLIST`) can be deleted.
+
+Note on copyright: these are commercial recordings. If the repository or site is public, committing the MP3s republishes them. Prefer a private Supabase Storage bucket with signed URLs (see `supabase.md`), or keep the repo private.
 
 ## Supabase later (not implemented)
 
@@ -122,7 +125,7 @@ The audio element already uses `crossOrigin="anonymous"` so Web Audio (fades, un
 
 ## Known issues / remaining
 
-- **Real content needed:** five photos, the real songs and their titles. Optionally a small line above the title (`BIRTHDAY_EYEBROW`), e.g. her name or the date.
+- **Real content needed:** her five photos, and the MP3s for "Perfect" and "I Wanna Be Yours" (titles are already set). Until the MP3s exist, the browser console shows two harmless "failed to load" lines for them and the placeholder piano plays. Optionally a small line above the title (`BIRTHDAY_EYEBROW`), e.g. the date.
 - `MEMORIES_01` ("Some moments stay with me.") and the photo captions (`i.`, `ii.`) are placeholder copy I added; change or empty them in `text.ts`.
 - The placeholder photos are soft gradients; the photo treatments (print, cinema crop, soft focus) will look best once real photos are in. Check `focus` for the eyes photo especially.
 - Tested in headless Chromium (software WebGL) at 1280×800 and 390×844. Worth a final check on a real iPhone (Safari) and Android before sharing.

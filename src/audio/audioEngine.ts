@@ -8,9 +8,12 @@
  *   - underwater it becomes gently muffled, and opens up again at the surface,
  *   - in the quietest moment it steps back a little,
  *   - its soft loudness lets the heart's glow breathe with it (barely).
+ *
+ * Songs whose file can't be loaded are skipped; if none of the playlist can
+ * be played, the placeholder pieces play instead.
  */
 
-import { DEFAULT_VOLUME, PLAYLIST, type Song } from '../content/songs';
+import { DEFAULT_VOLUME, FALLBACK_PLAYLIST, PLAYLIST, type Song } from '../content/songs';
 import { getSongUrl } from '../utils/assets';
 
 export interface AudioSnapshot {
@@ -34,7 +37,11 @@ class AudioEngine {
   private fadeFrame = 0;
   private fade = 0;
   private mood = 1;
-  private snap: AudioSnapshot = { index: 0, song: PLAYLIST[0], playing: false, started: false };
+  private list: readonly Song[] = PLAYLIST.length ? PLAYLIST : FALLBACK_PLAYLIST;
+  private missing = new Set<string>();
+  /** Whether she wants music right now (survives skipping a missing song). */
+  private wanted = false;
+  private snap: AudioSnapshot = { index: 0, song: this.list[0], playing: false, started: false };
 
   subscribe = (fn: () => void) => {
     this.listeners.add(fn);
@@ -57,6 +64,7 @@ class AudioEngine {
     audio.crossOrigin = 'anonymous'; // Supabase Storage sends CORS headers.
     audio.src = getSongUrl(this.snap.song);
     audio.addEventListener('ended', () => this.select(this.snap.index + 1, true));
+    audio.addEventListener('error', () => this.skipMissing());
     audio.addEventListener('pause', () => this.set({ playing: false }));
     audio.addEventListener('play', () => this.set({ playing: true }));
     this.audio = audio;
@@ -112,7 +120,21 @@ class AudioEngine {
     });
   }
 
+  /** The current song's file couldn't be loaded: move on quietly. */
+  private skipMissing() {
+    this.missing.add(this.snap.song.id);
+    if (this.list.every((song) => this.missing.has(song.id))) {
+      if (this.list !== FALLBACK_PLAYLIST) {
+        this.list = FALLBACK_PLAYLIST;
+        this.select(0, this.wanted);
+      }
+      return;
+    }
+    this.select(this.snap.index + 1, this.wanted);
+  }
+
   async play() {
+    this.wanted = true;
     const audio = this.ensure();
     if (this.ctx?.state === 'suspended') await this.ctx.resume().catch(() => {});
     try {
@@ -125,6 +147,7 @@ class AudioEngine {
   }
 
   async pause() {
+    this.wanted = false;
     if (!this.audio) return;
     await this.fadeTo(0, FADE_OUT);
     this.audio.pause();
@@ -136,14 +159,18 @@ class AudioEngine {
 
   /** Switch song. Keeps playing if we were; `autoplay` forces either way. */
   async select(index: number, autoplay?: boolean) {
-    const i = (index + PLAYLIST.length) % PLAYLIST.length;
+    const n = this.list.length;
+    const step = index < this.snap.index ? -1 : 1;
+    let i = ((index % n) + n) % n;
+    // Skip songs already known to be missing.
+    for (let k = 0; k < n && this.missing.has(this.list[i].id); k++) i = (((i + step) % n) + n) % n;
     const audio = this.ensure();
     const play = autoplay ?? this.snap.playing;
     if (this.snap.playing) await this.fadeTo(0, FADE_OUT);
     this.fade = 0;
     this.apply();
-    audio.src = getSongUrl(PLAYLIST[i]);
-    this.set({ index: i, song: PLAYLIST[i] });
+    audio.src = getSongUrl(this.list[i]);
+    this.set({ index: i, song: this.list[i] });
     if (play) await this.play();
   }
 

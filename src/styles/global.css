@@ -1047,6 +1047,75 @@ em {
   font-style: italic;
 }
 
+/* Her names, taking turns after "Happy Birthday". */
+.name-flip {
+  display: inline-grid;
+  justify-items: center;
+  perspective: 700px;
+}
+
+.name-flip__name {
+  grid-area: 1 / 1;
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+  font-style: italic;
+  color: #c27792;
+  backface-visibility: hidden;
+  transform-origin: 50% 50% -0.35em;
+  transition:
+    transform 1s var(--ease),
+    opacity 0.8s var(--ease),
+    filter 0.8s var(--ease);
+}
+
+.name-flip__name.is-in {
+  opacity: 1;
+  transform: none;
+  filter: none;
+}
+
+.name-flip__name.is-out {
+  opacity: 0;
+  transform: rotateX(80deg);
+  filter: blur(3px);
+}
+
+.name-flip__name.is-waiting {
+  opacity: 0;
+  transform: rotateX(-80deg);
+  filter: blur(3px);
+  transition: none;
+}
+
+.birthday__heart-mark {
+  display: inline-flex;
+  max-width: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition:
+    max-width 1.2s var(--ease),
+    opacity 1.6s var(--ease);
+}
+
+.birthday__heart-mark.is-on {
+  max-width: 1em;
+  opacity: 1;
+  overflow: visible;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 .inline-heart {
   display: inline-block;
   width: 0.5em;
@@ -1093,6 +1162,9 @@ em {
     text-align: left;
   }
   .birthday__lines {
+    justify-items: start;
+  }
+  .name-flip {
     justify-items: start;
   }
 }
@@ -1340,5 +1412,10 @@ em {
   }
   .gate__inner > * {
     transform: none;
+  }
+  .name-flip__name.is-out,
+  .name-flip__name.is-waiting {
+    transform: none;
+    filter: none;
   }
 }

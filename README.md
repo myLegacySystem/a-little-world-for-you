@@ -23,9 +23,9 @@ npm run lint
 
 | What | Where |
 |------|-------|
-| Every word on the page (including "Happy Birthday") | `src/content/text.ts` |
+| Every word on the page (including "Happy Birthday" and the names that flip after it) | `src/content/text.ts` |
 | Photos (5) | `public/assets/images/photo-01.jpg` … `photo-05.jpg`, described in `src/content/photos.ts` |
-| Songs | `public/assets/music/song-01.mp3` …, titles and order in `src/content/songs.ts` |
+| Songs | `public/assets/music/perfect.mp3`, `i-wanna-be-yours.mp3` (titles and order in `src/content/songs.ts`; placeholder piano plays until they're added) |
 | When each line appears | the scene files in `src/scenes/` (`at` / `out`) |
 | How the world looks along the way | `src/three/timeline.ts` |
 | Scene order and length | `src/scenes/config.ts` |

@@ -1,7 +1,11 @@
+import type { CSSProperties } from 'react';
 import { Botanical } from '../components/Botanical';
 import { HeartAnchor } from '../components/HeartAnchor';
+import { InlineHeart } from '../components/InlineHeart';
+import { NameFlip } from '../components/NameFlip';
 import { Photo } from '../components/Photo';
 import { Reveal } from '../components/Reveal';
+import { Words } from '../components/Words';
 import { PHOTOS } from '../content/photos';
 import { TEXT } from '../content/text';
 import { ramp } from '../utils/math';
@@ -9,7 +13,8 @@ import { Scene, useSceneProgress } from './Scene';
 
 /**
  * Everything comes together, and stays. The last scene remains pinned at the
- * end of the page: the heart, the photograph, the light and the music go on.
+ * end of the page: the heart, the photograph, the light, the music — and her
+ * names, taking turns after "Happy Birthday" — go on.
  */
 export function BirthdayScene() {
   return (
@@ -22,6 +27,8 @@ export function BirthdayScene() {
 function BirthdayStage() {
   const p = useSceneProgress();
   const photo = ramp(p, 0.06, 0.2);
+  const titleOn = p >= 0.15;
+  const titleLines = TEXT.BIRTHDAY_TITLE.split('\n').length;
   return (
     <div className="birthday">
       <div className="birthday__picture">
@@ -35,12 +42,23 @@ function BirthdayStage() {
         <HeartAnchor className="birthday__heart" />
       </div>
       <div className="birthday__words">
-        <div className="stack">
-          <div>
-            <Reveal text={TEXT.BIRTHDAY_EYEBROW} at={0.13} out={0.88} className="t-label" />
-            <Reveal as="h1" text={TEXT.BIRTHDAY_TITLE} at={0.15} out={0.88} className="t-display birthday__title" />
-          </div>
-          <Reveal as="h2" text={TEXT.FINAL_BIRTHDAY} at={0.9} className="t-display birthday__title" />
+        <div>
+          <Reveal text={TEXT.BIRTHDAY_EYEBROW} at={0.13} className="t-label" />
+          {/* "Happy Birthday" stays; the name after it takes turns. */}
+          <h1 className={`reveal reveal--${titleOn ? 'on' : 'before'} t-display birthday__title`}>
+            <Words text={TEXT.BIRTHDAY_TITLE} />
+            <span className="w-line birthday__name" style={{ '--i': titleLines } as CSSProperties}>
+              <NameFlip
+                names={TEXT.BIRTHDAY_NAMES}
+                active={titleOn}
+                suffix={
+                  <span className={`birthday__heart-mark ${p >= 0.9 ? 'is-on' : ''}`}>
+                    <InlineHeart />
+                  </span>
+                }
+              />
+            </span>
+          </h1>
         </div>
         <div className="stack birthday__lines">
           <div>

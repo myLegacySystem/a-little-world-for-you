@@ -8,7 +8,7 @@
  *   *words*   set in italics           ("It's your *soul.*")
  *
  * A trailing 🩷 is drawn as a small soft pink heart so it looks the same on
- * every phone.
+ * every phone. (At the very end, that heart also appears beside the title.)
  */
 export const TEXT = {
   // ── Page ────────────────────────────────────────────────────────────────
@@ -95,6 +95,12 @@ export const TEXT = {
   /** Small line above the title. Leave empty ('') to hide it. */
   BIRTHDAY_EYEBROW: '',
   BIRTHDAY_TITLE: 'Happy Birthday',
+  /**
+   * The names I call her. They take turns after the title, flipping from one
+   * to the next ("Happy Birthday" stays). Add, remove or reorder freely; with
+   * a single name it simply stays; with none, the title stands alone.
+   */
+  BIRTHDAY_NAMES: ['MadamJi', 'Purnpoli', 'Ukdicha Modak', 'Kaju Katli'],
   BIRTHDAY_INTRO_01: "Today isn't just another day.",
   BIRTHDAY_INTRO_02: "It's the day someone very special to me\ncame into this world.",
   BIRTHDAY_01: 'I hope this year is kind to you.',
@@ -104,7 +110,6 @@ export const TEXT = {
   BIRTHDAY_05: 'I hope you discover beautiful things.',
   BIRTHDAY_06: 'And I hope I get to be around\nfor a lot of them.',
   FINAL: 'Thank you for bringing\ncolor into my world.',
-  FINAL_BIRTHDAY: 'Happy Birthday. 🩷',
 
   // ── Photo descriptions (read aloud by screen readers) ───────────────────
   PHOTO_01_ALT: 'A memory of her',
