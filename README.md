@@ -16,6 +16,18 @@ npm run preview   # serve the production build
 npm run lint      # run ESLint
 ```
 
+## Deploying to GitHub Pages
+
+The site must be **built** before it's served. Serving the repository files directly shows a blank page, because `index.html` points at the unbuilt `src/main.tsx`.
+
+`.github/workflows/deploy.yml` builds the site and publishes `dist/` on every push to `main`. One-time setup:
+
+1. In the repository on GitHub, open **Settings → Pages**.
+2. Under **Build and deployment → Source**, choose **GitHub Actions** (not "Deploy from a branch").
+3. Push to `main`, or run the workflow by hand from the **Actions** tab.
+
+The workflow sets `BASE_PATH=/<repo-name>/` so every asset URL works under `https://<user>.github.io/<repo-name>/`. Other hosts that serve from `/` need no setting.
+
 ## The journey
 
 One continuous, scroll-driven story. Each scene is a tall section with a pinned stage; one WebGL canvas sits behind all of them and eases between moods as you scroll.
