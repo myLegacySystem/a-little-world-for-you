@@ -24,7 +24,7 @@ npm run lint
 | What | Where |
 |------|-------|
 | Every word on the page (including "Happy Birthday" and the names that flip after it) | `src/content/text.ts` |
-| Photos (5) | Supabase Storage + the `photos` table (see [supabase.md](supabase.md)); placeholders in `public/assets/images/`, places described in `src/content/photos.ts` |
+| Photos (4) | Supabase Storage + the `photos` table (see [supabase.md](supabase.md)); placeholders in `public/assets/images/`, places described in `src/content/photos.ts` |
 | Songs | Supabase Storage + the `songs` table (see [supabase.md](supabase.md)); without it, `PLAYLIST` in `src/content/songs.ts` and `public/assets/music/` (placeholder piano plays when nothing else can) |
 | When each line appears | the scene files in `src/scenes/` (`at` / `out`) |
 | How the world looks along the way | `src/three/timeline.ts` |

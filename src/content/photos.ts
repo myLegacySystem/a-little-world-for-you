@@ -1,10 +1,10 @@
 /**
- * The photographs. Only five — each one has a place in the story.
+ * The photographs. Only four — each one has a place in the story.
  *
  * With Supabase configured, each place shows the file named by the `photos`
- * row whose sort_order is its number (1 = PHOTO_01 … 5 = PHOTO_05); see
- * supabase.md. Places without a row use `localPath`. Components never read
- * either directly; they go through getPhotoUrl() in utils/assets.ts.
+ * row whose sort_order is its `place` (see supabase.md). Places without a row
+ * use `localPath`. Components never read either directly; they go through
+ * getPhotoUrl() in utils/assets.ts.
  */
 
 import { TEXT } from './text';
@@ -12,6 +12,11 @@ import { TEXT } from './text';
 export interface Photo {
   /** Stable identifier. */
   id: string;
+  /**
+   * The `photos.sort_order` that fills this place. Numbers never move, so rows
+   * keep their meaning (3, once her eyes, is no longer used).
+   */
+  place: number;
   /** Path under /public. */
   localPath: string;
   alt: string;
@@ -24,6 +29,7 @@ export interface Photo {
 export const PHOTOS = {
   PHOTO_01: {
     id: 'photo-01',
+    place: 1,
     localPath: '/assets/images/photo-01.jpg',
     alt: TEXT.PHOTO_01_ALT,
     focus: '50% 40%',
@@ -31,20 +37,15 @@ export const PHOTOS = {
   },
   PHOTO_02: {
     id: 'photo-02',
+    place: 2,
     localPath: '/assets/images/photo-02.jpg',
     alt: TEXT.PHOTO_02_ALT,
     focus: '50% 40%',
     role: 'Memories — the smaller print beside it.',
   },
-  PHOTO_03: {
-    id: 'photo-03',
-    localPath: '/assets/images/photo-03.jpg',
-    alt: TEXT.PHOTO_03_ALT,
-    focus: '50% 38%',
-    role: 'Her eyes — a wide cinematic crop that pulls you into the sea. A close portrait works best.',
-  },
   PHOTO_04: {
     id: 'photo-04',
+    place: 4,
     localPath: '/assets/images/photo-04.jpg',
     alt: TEXT.PHOTO_04_ALT,
     focus: '50% 35%',
@@ -52,6 +53,7 @@ export const PHOTOS = {
   },
   PHOTO_05: {
     id: 'photo-05',
+    place: 5,
     localPath: '/assets/images/photo-05.jpg',
     alt: TEXT.PHOTO_05_ALT,
     focus: '50% 40%',

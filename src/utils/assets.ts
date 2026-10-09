@@ -5,8 +5,8 @@
  *
  * With Supabase (see supabase.md), loadAssets() reads two tables before the
  * first render:
- *   photos — `sort_order` is the photo's place in the story (1 = PHOTO_01 …
- *            5 = PHOTO_05) and `file_path` its object in the bucket.
+ *   photos — `sort_order` is the photo's place in the story (`place` in
+ *            content/photos.ts) and `file_path` its object in the bucket.
  *   songs  — the playlist, in `sort_order`.
  * Only `active` rows count. A place with no row, or a table that can't be
  * read, falls back to the local files, so the site always works.
@@ -53,7 +53,7 @@ export async function loadAssets(): Promise<void> {
   if (photos.status === 'fulfilled') {
     const places: readonly Photo[] = Object.values(PHOTOS);
     for (const row of photos.value) {
-      const photo = places[row.sort_order - 1];
+      const photo = places.find((p) => p.place === row.sort_order);
       if (photo && row.file_path && !storedPhotos.has(photo.id)) storedPhotos.set(photo.id, storageUrl(row.file_path));
     }
   } else {

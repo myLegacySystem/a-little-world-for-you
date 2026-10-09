@@ -4,10 +4,10 @@ The real photos and songs live in Supabase, not in this repository. The site rea
 
 ```text
 Storage bucket  birthday-assets  (public)
-├── photos/   the five photos (any file names)
+├── photos/   the four photos (any file names)
 └── songs/    the songs (any file names)
 
-Table photos   sort_order = the photo's place in the story (1–5), file_path = its file in the bucket
+Table photos   sort_order = the photo's place in the story (1, 2, 4, 5), file_path = its file in the bucket
 Table songs    the playlist, in sort_order
 ```
 
@@ -32,17 +32,16 @@ Photos about 1200–1600px on the long edge (JPEG quality ~80) keep the page qui
 - gives each uploaded photo without a row the next free place, in file-name order. For camera names like `IMG_20261009_121118.jpg`, that's the order they were taken;
 - adds each uploaded song without a row to the end of the playlist ("Perfect" first), with a title from its file name.
 
-The five places (`sort_order`):
+The four places (`sort_order`):
 
 | sort_order | Place | Best kind of photo |
 |---|---|---|
 | 1 | Memories, the larger print | Any photo you love |
 | 2 | Memories, the smaller print | A second moment |
-| 3 | Her eyes, seen through water | A close portrait, eyes near the centre |
 | 4 | Her soul, warm light and petals | Warm, candid, sunlit |
 | 5 | The birthday, the last one she sees | The one she should see last |
 
-To put a photo somewhere else, swap `sort_order` values in **Table Editor → photos**. Song titles and order are in **Table Editor → songs**. If a crop cuts off the important part, adjust `focus` for that place in `src/content/photos.ts`.
+There is no place 3 (it was her eyes, seen through water; that moment now has only words). A row with `sort_order` 3 is simply not shown. To put a photo somewhere else, swap `sort_order` values in **Table Editor → photos**. Song titles and order are in **Table Editor → songs**. If a crop cuts off the important part, adjust `focus` for that place in `src/content/photos.ts`.
 
 ## 3. Connect the site (done)
 

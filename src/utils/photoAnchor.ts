@@ -7,13 +7,10 @@
  * floating, catching the pointer — and the DOM image stays invisible.
  */
 
-export type PhotoMode = 'print' | 'water';
-
 export interface WorldPhoto {
   key: string;
   el: HTMLElement;
   url: string;
-  mode: PhotoMode;
   /** 0 → 1 presence, set by the scene as it scrolls. */
   visible: number;
   /** Tilt of the print in degrees (matches the layout's rotation). */

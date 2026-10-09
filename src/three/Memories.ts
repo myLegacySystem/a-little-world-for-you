@@ -5,7 +5,6 @@
  * placed where its layout box is. It doesn't fade in like a card — it
  * materialises from specks of light, sits on cream print paper with a little
  * grain and a soft shadow, floats very slightly, and leans toward the pointer.
- * Her eyes (mode "water") are seen through moving water instead.
  *
  * Textures load only when a photo comes near the screen, and are disposed when
  * the photo leaves the page.
@@ -31,7 +30,6 @@ uniform vec2 uImg;
 uniform vec2 uFrame;
 uniform float uV;
 uniform float uTime;
-uniform float uWater;
 uniform float uSeed;
 varying vec2 vUv;
 
@@ -40,13 +38,11 @@ ${noise}
 void main() {
   vec2 uv = vUv;
   float aspect = uFrame.x / uFrame.y;
-  bool print = uWater < 0.5;
 
   // Cream print border, the same physical width on every side.
-  vec2 b = print ? vec2(0.034, 0.034 * aspect) : vec2(0.0);
+  vec2 b = vec2(0.034, 0.034 * aspect);
   vec2 inner = (uv - b) / (1.0 - 2.0 * b);
   vec2 iuv = inner;
-  if (!print) iuv += vec2(sin(iuv.y * 16.0 + uTime * 0.9), cos(iuv.x * 13.0 + uTime * 0.7)) * 0.007;
 
   // Cover-crop the image into the frame.
   float fa = (uFrame.x * (1.0 - 2.0 * b.x)) / (uFrame.y * (1.0 - 2.0 * b.y));
@@ -60,19 +56,9 @@ void main() {
   img += (hash(uv * vec2(731.0, 913.0) + fract(uTime * 0.53)) - 0.5) * 0.045;
   img *= 1.0 - 0.16 * pow(length(iuv - 0.5) * 1.3, 2.0);
 
-  vec3 col;
-  float alpha = 1.0;
-  if (print) {
-    bool inside = inner.x > 0.0 && inner.x < 1.0 && inner.y > 0.0 && inner.y < 1.0;
-    vec3 paper = vec3(1.0, 0.992, 0.984) - (hash(uv * 300.0) - 0.5) * 0.02;
-    col = inside ? img : paper;
-  } else {
-    // Under water: blue light, moving caustics, edges dissolving into the sea.
-    col = mix(img, img * vec3(0.55, 0.8, 1.0) + vec3(0.03, 0.13, 0.24), 0.55);
-    float caus = pow(abs(sin(uv.x * 19.0 + sin(uv.y * 14.0 + uTime * 0.8) * 2.0)), 14.0);
-    col += vec3(0.75, 0.92, 1.0) * caus * 0.09 * smoothstep(0.2, 1.0, uv.y);
-    alpha = smoothstep(1.0, 0.55, length((uv - 0.5) * 2.0));
-  }
+  bool inside = inner.x > 0.0 && inner.x < 1.0 && inner.y > 0.0 && inner.y < 1.0;
+  vec3 paper = vec3(1.0, 0.992, 0.984) - (hash(uv * 300.0) - 0.5) * 0.02;
+  vec3 col = inside ? img : paper;
 
   // Emerging from specks of light: a ragged frontier of glowing grains.
   vec2 g = uv * vec2(aspect, 1.0);
@@ -83,7 +69,7 @@ void main() {
   vec3 light = mix(vec3(1.0, 0.8, 0.87), vec3(1.0, 0.92, 0.78), hash(floor(g * 70.0)));
   float present = show + specks * 0.9 * step(0.001, uV);
   col = mix(col, light, specks / (present + 1e-3));
-  gl_FragColor = vec4(col, alpha * present);
+  gl_FragColor = vec4(col, present);
 }
 `;
 
@@ -134,7 +120,6 @@ export class Memories {
         uFrame: { value: new THREE.Vector2(4, 5) },
         uV: { value: 0 },
         uTime: { value: 0 },
-        uWater: { value: photo.mode === 'water' ? 1 : 0 },
         uSeed: { value: seed },
       },
       transparent: true,
@@ -151,7 +136,6 @@ export class Memories {
     const shadow = new THREE.Mesh(this.geometry, shadowMaterial);
     mesh.renderOrder = 1;
     shadow.renderOrder = 0;
-    shadow.visible = photo.mode === 'print';
     this.group.add(shadow, mesh);
     const item: Item = { mesh, shadow, material, shadowMaterial, texture: null, loading: false, url: photo.url, v: 0, seed };
     this.items.set(key, item);
@@ -211,17 +195,16 @@ export class Memories {
       item.v += (photo.visible - item.v) * (1 - Math.exp(-dt * 3));
       const on = near && item.v > 0.002;
       item.mesh.visible = on;
-      item.shadow.visible = on && photo.mode === 'print';
+      item.shadow.visible = on;
       if (!on) continue;
 
-      // Untransformed size for tilted prints; on-screen size for the eyes
-      // (which zoom with their window as she's pulled in).
+      // Untransformed size for tilted prints (their on-screen box grows with the tilt).
       const w = photo.tilt ? photo.el.offsetWidth : r.width;
       const h = photo.tilt ? photo.el.offsetHeight : r.height;
       const c = toWorld(r.left + r.width / 2, r.top + r.height / 2);
       const W = w * c.unit;
       const H = h * c.unit;
-      const float = photo.mode === 'print' ? Math.sin(time * 0.5 + item.seed) * 0.02 : 0;
+      const float = Math.sin(time * 0.5 + item.seed) * 0.02;
 
       item.mesh.position.set(c.x, c.y + float, 0.15);
       item.mesh.scale.set(W, H, 1);
