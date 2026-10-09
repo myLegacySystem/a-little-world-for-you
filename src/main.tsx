@@ -10,13 +10,18 @@ import '@fontsource/manrope/latin-400.css';
 import '@fontsource/manrope/latin-500.css';
 import './styles/global.css';
 import { App } from './App';
+import { loadAssets } from './utils/assets';
 
 // Always begin at the beginning.
 if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
 window.scrollTo(0, 0);
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <App />
-  </StrictMode>,
-);
+// Photos and songs may live in Supabase: find out where before the first frame
+// (and render regardless, so a surprise from Supabase never leaves a blank page).
+loadAssets().finally(() => {
+  createRoot(document.getElementById('root')!).render(
+    <StrictMode>
+      <App />
+    </StrictMode>,
+  );
+});

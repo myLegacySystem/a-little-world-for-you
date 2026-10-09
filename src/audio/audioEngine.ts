@@ -13,8 +13,8 @@
  * be played, the placeholder pieces play instead.
  */
 
-import { DEFAULT_VOLUME, FALLBACK_PLAYLIST, PLAYLIST, type Song } from '../content/songs';
-import { getSongUrl } from '../utils/assets';
+import { DEFAULT_VOLUME, FALLBACK_PLAYLIST, type Song } from '../content/songs';
+import { getPlaylist, getSongUrl } from '../utils/assets';
 
 export interface AudioSnapshot {
   index: number;
@@ -37,7 +37,8 @@ class AudioEngine {
   private fadeFrame = 0;
   private fade = 0;
   private mood = 1;
-  private list: readonly Song[] = PLAYLIST.length ? PLAYLIST : FALLBACK_PLAYLIST;
+  /** Chosen on first use: by then we know whether the songs come from Supabase. */
+  private list: readonly Song[] = FALLBACK_PLAYLIST;
   private missing = new Set<string>();
   /** Whether she wants music right now (survives skipping a missing song). */
   private wanted = false;
@@ -59,6 +60,9 @@ class AudioEngine {
 
   private ensure() {
     if (this.audio) return this.audio;
+    const playlist = getPlaylist();
+    this.list = playlist.length ? playlist : FALLBACK_PLAYLIST;
+    this.snap = { ...this.snap, index: 0, song: this.list[0] };
     const audio = new Audio();
     audio.preload = 'none';
     audio.crossOrigin = 'anonymous'; // Supabase Storage sends CORS headers.
@@ -159,12 +163,12 @@ class AudioEngine {
 
   /** Switch song. Keeps playing if we were; `autoplay` forces either way. */
   async select(index: number, autoplay?: boolean) {
+    const audio = this.ensure();
     const n = this.list.length;
     const step = index < this.snap.index ? -1 : 1;
     let i = ((index % n) + n) % n;
     // Skip songs already known to be missing.
     for (let k = 0; k < n && this.missing.has(this.list[i].id); k++) i = (((i + step) % n) + n) % n;
-    const audio = this.ensure();
     const play = autoplay ?? this.snap.playing;
     if (this.snap.playing) await this.fadeTo(0, FADE_OUT);
     this.fade = 0;

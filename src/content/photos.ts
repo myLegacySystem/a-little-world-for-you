@@ -1,16 +1,16 @@
 /**
  * The photographs. Only five — each one has a place in the story.
  *
- * To use the real photos, replace the files in /public/assets/images/ (same
- * names), or point `localPath` somewhere else. Components never read
- * `localPath` directly; they go through getPhotoUrl() in utils/assets.ts,
- * which is the only thing that changes when photos move to Supabase.
+ * With Supabase configured, each place shows the file named by the `photos`
+ * row whose sort_order is its number (1 = PHOTO_01 … 5 = PHOTO_05); see
+ * supabase.md. Places without a row use `localPath`. Components never read
+ * either directly; they go through getPhotoUrl() in utils/assets.ts.
  */
 
 import { TEXT } from './text';
 
 export interface Photo {
-  /** Stable identifier (also the Supabase object name later). */
+  /** Stable identifier. */
   id: string;
   /** Path under /public. */
   localPath: string;
