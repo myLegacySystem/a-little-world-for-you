@@ -2,7 +2,7 @@
 
 A private birthday experience: a small world that begins pale and colorless, fills with watercolor, forms a soft pink glass heart, dissolves into the sea, rises into stars, warms into dawn, and comes together again for her birthday. Words, photographs and music carry the rest.
 
-Built with React, TypeScript, Vite and Three.js. Open → Enter → scroll.
+Built with React, TypeScript, Vite and Three.js. Open → Enter → the story plays by itself, stopping on every line long enough to read it (pause, previous and next sit at the bottom; scrolling by hand works too).
 
 See **[progress.md](progress.md)** for the full picture: the scene-by-scene journey, architecture, decisions, and what's left.
 
@@ -27,6 +27,8 @@ npm run lint
 | Photos (4) | Supabase Storage + the `photos` table (see [supabase.md](supabase.md)); placeholders in `public/assets/images/`, places described in `src/content/photos.ts` |
 | Songs | Supabase Storage + the `songs` table (see [supabase.md](supabase.md)); without it, `PLAYLIST` in `src/content/songs.ts` and `public/assets/music/` (placeholder piano plays when nothing else can) |
 | When each line appears | the scene files in `src/scenes/` (`at` / `out`) |
+| How long autoplay stays on each line, and how fast it moves | the pacing numbers at the top of `src/utils/autoplay.ts` |
+| Where autoplay pauses with no words (the heart forming, photos arriving…) | the `<Beat at seconds>` lines in the scene files |
 | How the world looks along the way | `src/three/timeline.ts` |
 | Scene order and length | `src/scenes/config.ts` |
 

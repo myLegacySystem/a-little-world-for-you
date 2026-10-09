@@ -1,4 +1,5 @@
 import type { CSSProperties } from 'react';
+import { Beat } from '../components/Beat';
 import { HeartAnchor } from '../components/HeartAnchor';
 import { TEXT } from '../content/text';
 import { reducedMotion } from '../utils/device';
@@ -24,6 +25,9 @@ function HeartStage() {
   return (
     <div className="heart-stage" style={{ '--near': near } as CSSProperties}>
       <HeartAnchor className="heart-stage__heart" />
+      {/* The shape found, then the glass formed. */}
+      <Beat at={0.32} seconds={2.5} />
+      <Beat at={0.6} seconds={3.5} />
     </div>
   );
 }

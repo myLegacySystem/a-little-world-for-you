@@ -1,3 +1,4 @@
+import { Beat } from '../components/Beat';
 import { HeartAnchor } from '../components/HeartAnchor';
 import { Photo } from '../components/Photo';
 import { Reveal } from '../components/Reveal';
@@ -38,6 +39,9 @@ function MemoriesStage() {
         tilt={4}
       />
       <HeartAnchor className="memories__heart" />
+      {/* Each photograph, once it has arrived. */}
+      <Beat at={0.25} seconds={2} />
+      <Beat at={0.37} seconds={2.5} />
       <Reveal text={TEXT.MEMORIES_01} at={0.42} className="t-medium memories__words" />
     </div>
   );

@@ -113,3 +113,10 @@ export function onJourney(fn: (pos: number) => void) {
 export function remeasure() {
   measure();
 }
+
+/** The scroll position at which scene `id` reaches progress `p` (null until it's measured). */
+export function scrollFor(id: string, p: number) {
+  const e = entries.get(id);
+  if (!e?.el) return null;
+  return e.top + p * Math.max(1, e.height - window.innerHeight);
+}

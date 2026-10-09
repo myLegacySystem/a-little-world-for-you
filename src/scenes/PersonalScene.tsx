@@ -1,3 +1,4 @@
+import { Beat } from '../components/Beat';
 import { HeartAnchor } from '../components/HeartAnchor';
 import { Reveal } from '../components/Reveal';
 import { TEXT } from '../content/text';
@@ -9,6 +10,8 @@ export function PersonalScene() {
     <Scene id="personal" label={TEXT.LABEL_PERSONAL}>
       <div className="personal">
         <HeartAnchor className="personal__heart" />
+        {/* The light remembers the heart. */}
+        <Beat at={0.93} seconds={2.5} />
         <div className="stack personal__words">
           <Reveal text={TEXT.PERSONAL_01} at={0.06} out={0.2} className="t-medium" />
           <div>

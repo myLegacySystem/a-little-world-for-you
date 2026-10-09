@@ -125,6 +125,15 @@ export const TEXT = {
   MUSIC_PREVIOUS: 'Previous song',
   MUSIC_NOW_PLAYING: 'Now playing',
 
+  // ── Story controls (the story plays by itself) ─────────────────────────
+  /** Shown for a few seconds above the controls when the story begins. */
+  STORY_HINT: 'it plays by itself',
+  STORY_CONTROLS: 'Story',
+  STORY_PLAY: 'Play the story',
+  STORY_PAUSE: 'Pause the story',
+  STORY_PREVIOUS: 'Previous line',
+  STORY_NEXT: 'Next line',
+
   // ── Names of each part, for screen readers ──────────────────────────────
   LABEL_OPENING: 'Before',
   LABEL_COLOR: 'Color',
