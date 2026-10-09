@@ -128,7 +128,7 @@ Steps to go live: [supabase.md](supabase.md). Setup SQL: `supabase/setup.sql`.
 - `src/utils/supabase.ts` reads tables over the REST API with plain `fetch` (no client library) and builds public Storage URLs. Config: `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY` in `.env.production` (public values; read by every build, not by `npm run dev`).
 - `loadAssets()` in `src/utils/assets.ts` runs before the first render (`main.tsx`): `photos` rows fill the five places by `sort_order`; `songs` rows become the playlist. Anything missing, unreadable, or slower than 5 s falls back to `public/`.
 - The audio engine picks its playlist when the music first starts (`getPlaylist()`), after that load.
-- Tested against a local mock of the REST and Storage endpoints (publishable and legacy JWT keys, partial tables, odd file paths, a missing song, Supabase down, a hanging server), and the SQL against Postgres 16 (re-runnable; the anon role reads active rows only and can't write). Not yet run against the real project.
+- Tested against a local mock of the REST and Storage endpoints (publishable and legacy JWT keys, partial tables, odd file paths, a missing song, Supabase down, a hanging server), and the SQL against Postgres 16 with stand-ins for Supabase's storage tables (rows built from the uploaded files, re-runnable, stale rows switched off; the anon role reads active rows only and can't write). Not yet run against the real project.
 
 The audio element and photo loaders use `crossOrigin="anonymous"`, so Web Audio (fades, underwater filter) and WebGL textures work with Storage URLs.
 

@@ -1,6 +1,7 @@
 -- A little world, made for you — Supabase setup.
 --
--- Run once in the Supabase dashboard: SQL Editor → New query → paste → Run.
+-- Upload the photos and songs first, then run this in the Supabase dashboard:
+-- SQL Editor → New query → paste → Run.
 -- Safe to run again: it only creates what's missing and resets the read rules.
 -- Steps and the reasons behind them: supabase.md.
 
@@ -48,30 +49,78 @@ drop policy if exists "The site reads active songs" on public.songs;
 create policy "The site reads active songs" on public.songs
   for select to anon using (active);
 
--- 4. Rows ---------------------------------------------------------------------
--- photos.sort_order is the photo's place in the story. Upload the files to
--- these paths, or upload under any name and change file_path to match.
--- Rows for places that already have one are skipped.
-insert into public.photos (file_path, sort_order)
-select v.file_path, v.sort_order
-from (
-  values
-    ('photos/photo-01.jpg', 1), -- Memories: the larger print
-    ('photos/photo-02.jpg', 2), -- Memories: the smaller print
-    ('photos/photo-03.jpg', 3), -- Her eyes, seen through water (a close portrait)
-    ('photos/photo-04.jpg', 4), -- Her soul: warm light and petals
-    ('photos/photo-05.jpg', 5)  -- The birthday: the last one she sees
-) as v(file_path, sort_order)
-where not exists (select 1 from public.photos p where p.sort_order = v.sort_order)
-order by v.sort_order;
+-- 4. Rows, from the files you uploaded ---------------------------------------
+-- Upload the files first, then run this. Run it again after uploading more.
+-- A path is compared without a leading "birthday-assets/", as the site does.
 
--- songs, played in sort_order.
+-- Rows whose file isn't in the bucket (e.g. example names) are switched off.
+update public.photos p set active = false
+where p.active and p.file_path !~ '^https?://'
+  and not exists (
+    select 1 from storage.objects o
+    where o.bucket_id = 'birthday-assets'
+      and o.name = regexp_replace(p.file_path, '^/*(birthday-assets/)?', '')
+  );
+
+update public.songs s set active = false
+where s.active and s.file_path !~ '^https?://'
+  and not exists (
+    select 1 from storage.objects o
+    where o.bucket_id = 'birthday-assets'
+      and o.name = regexp_replace(s.file_path, '^/*(birthday-assets/)?', '')
+  );
+
+-- Each photo in photos/ that has no row yet takes the next free place, in
+-- file-name order (for camera names like IMG_20261009_121118.jpg, the order
+-- they were taken). sort_order is the place in the story:
+--   1 Memories, the larger print      2 Memories, the smaller print
+--   3 Her eyes, seen through water (a close portrait works best)
+--   4 Her soul, warm light and petals 5 The birthday, the last one she sees
+-- To move a photo, change its sort_order in Table Editor → photos.
+with files as (
+  select o.name, row_number() over (order by o.name) as k
+  from storage.objects o
+  where o.bucket_id = 'birthday-assets'
+    and o.name ~* '^photos/[^/]+\.(jpe?g|png|webp|avif)$'
+    and not exists (
+      select 1 from public.photos p
+      where regexp_replace(p.file_path, '^/*(birthday-assets/)?', '') = o.name
+    )
+),
+places as (
+  select n as sort_order, row_number() over (order by n) as k
+  from generate_series(1, 5) as n
+  where not exists (select 1 from public.photos p where p.active and p.sort_order = n)
+)
+insert into public.photos (file_path, sort_order)
+select files.name, places.sort_order
+from files join places using (k)
+order by places.sort_order;
+
+-- Each song in songs/ that has no row yet joins the end of the playlist
+-- ("Perfect" first). Titles come from the file name; edit them in
+-- Table Editor → songs.
 insert into public.songs (title, artist, file_path, sort_order)
-select v.title, v.artist, v.file_path, v.sort_order
+select
+  case
+    when f.name ilike '%perfect%' then 'Perfect'
+    when f.name ilike '%wanna%be%yours%' then 'I Wanna Be Yours'
+    else initcap(trim(regexp_replace(regexp_replace(f.name, '^songs/|\.[^.]+$', '', 'g'), '[-_ ]+', ' ', 'g')))
+  end,
+  case
+    when f.name ilike '%perfect%' then 'Ed Sheeran'
+    when f.name ilike '%wanna%be%yours%' then 'Arctic Monkeys'
+  end,
+  f.name,
+  (select coalesce(max(s.sort_order), 0) from public.songs s where s.active) + f.k
 from (
-  values
-    ('Perfect', 'Ed Sheeran', 'songs/perfect.mp3', 1),
-    ('I Wanna Be Yours', 'Arctic Monkeys', 'songs/i-wanna-be-yours.mp3', 2)
-) as v(title, artist, file_path, sort_order)
-where not exists (select 1 from public.songs s where s.file_path = v.file_path)
-order by v.sort_order;
+  select o.name, row_number() over (order by o.name ilike '%perfect%' desc, o.name) as k
+  from storage.objects o
+  where o.bucket_id = 'birthday-assets'
+    and o.name ~* '^songs/[^/]+\.(mp3|m4a|aac|ogg|wav)$'
+    and not exists (
+      select 1 from public.songs s
+      where regexp_replace(s.file_path, '^/*(birthday-assets/)?', '') = o.name
+    )
+) as f
+order by f.k;
