@@ -1,5 +1,6 @@
 import { IntroGate } from './components/IntroGate';
 import { MusicControl } from './components/MusicControl';
+import { StoryControls } from './components/StoryControls';
 import { Thread } from './components/Thread';
 import { BirthdayScene } from './scenes/BirthdayScene';
 import { ColorScene } from './scenes/ColorScene';
@@ -36,6 +37,7 @@ export function App() {
       </main>
       <Thread />
       <MusicControl />
+      <StoryControls />
       <IntroGate />
     </>
   );

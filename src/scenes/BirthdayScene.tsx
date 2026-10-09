@@ -1,4 +1,5 @@
 import type { CSSProperties } from 'react';
+import { Beat } from '../components/Beat';
 import { Botanical } from '../components/Botanical';
 import { HeartAnchor } from '../components/HeartAnchor';
 import { InlineHeart } from '../components/InlineHeart';
@@ -42,6 +43,10 @@ function BirthdayStage() {
         <Botanical kind="stem" on={p > 0.24} className="birthday__stem" />
         <HeartAnchor className="birthday__heart" />
       </div>
+      {/* The heart formed again; the title and a few of her names; the last heart. */}
+      <Beat at={0.17} seconds={2.5} />
+      <Beat at={0.2} seconds={6.5} />
+      <Beat at={0.9} seconds={4} />
       <div className="birthday__words">
         <div>
           <Reveal text={TEXT.BIRTHDAY_EYEBROW} at={0.19} className="t-label" />

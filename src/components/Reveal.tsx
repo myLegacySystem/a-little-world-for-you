@@ -1,5 +1,5 @@
 import type { CSSProperties, ElementType } from 'react';
-import { useSceneProgress } from '../scenes/Scene';
+import { useBeat, useSceneProgress } from '../scenes/Scene';
 import { Words } from './Words';
 
 interface RevealProps {
@@ -17,10 +17,11 @@ interface RevealProps {
 /**
  * Words that drift into the world line by line when the scroll reaches `at`,
  * and dissolve at `out`. The motion itself is time-based, so it stays calm
- * however fast she scrolls.
+ * however fast she scrolls. Autoplay stops at `at` long enough to read it.
  */
 export function Reveal({ text, at, out = Infinity, as: Tag = 'p', className = '', style }: RevealProps) {
   const p = useSceneProgress();
+  useBeat(at, text);
   const state = p < at ? 'before' : p >= out ? 'after' : 'on';
   if (!text) return null;
   return (

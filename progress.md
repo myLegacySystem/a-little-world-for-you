@@ -1,6 +1,17 @@
 # Progress — A little world, made for you
 
-## V2 — cinematic pass (latest)
+## Autoplay (latest)
+
+Scrolling by hand on a phone made it easy to miss lines: a flick could skip past a line before it had appeared, or past its `out`, and nothing said more text was coming. Now the story plays by itself.
+
+- **How it works** (`src/utils/autoplay.ts`): every `<Reveal>` registers a *beat* at its `at`; wordless moments register one with `<Beat at seconds>` (the heart forming, the photographs arriving, the sea rising, the stars, the heart's return, the last heart). Autoplay glides to each beat (eased, longer distances take longer) and stays long enough to read what just appeared: a moment for the line to drift in, then time per word. Lines that arrive together are read together. The opening waits for its three timed lines.
+- **Controls** (`components/StoryControls.tsx`): a small pill at the bottom: previous line · pause/play · next line. "It plays by itself" shows above it for a few seconds at the start. Pausing stops on the line that's coming and hands the page back; previous / next still step one line at a time while paused. The controls fade away once the last beat is reached and come back if she scrolls up. On phones they step aside while the song drawer is open.
+- **Her hands win**: swiping, the mouse wheel or dragging the scrollbar take over at once; after 3 s of stillness autoplay carries on from wherever she is. A tap on the page does nothing. Keyboard: Space pauses/plays, ↓/→/PageDown next line, ↑/←/PageUp previous.
+- A full play-through is about 7½ minutes (roughly the two songs); every line stays on screen at least ~4.5 s. Pacing lives in the constants at the top of `autoplay.ts`.
+- Tested in headless Chromium at 390×844 (touch) and 1280×800: a full unattended run (every line shown, controls fade at the end, no console errors), pause / next / previous / play, a touch swipe and the mouse wheel taking over and autoplay carrying on, a tap leaving it playing, the song drawer, and the keyboard. Still worth a try on a real iPhone and Android phone.
+
+
+## V2 — cinematic pass
 
 Built on top of the first version — same stack, content files, scroll director, timeline and anchors. What changed:
 
