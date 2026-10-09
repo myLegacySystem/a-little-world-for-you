@@ -24,15 +24,15 @@ npm run lint
 | What | Where |
 |------|-------|
 | Every word on the page (including "Happy Birthday" and the names that flip after it) | `src/content/text.ts` |
-| Photos (5) | `public/assets/images/photo-01.jpg` … `photo-05.jpg`, described in `src/content/photos.ts` |
-| Songs | `public/assets/music/perfect.mp3`, `i-wanna-be-yours.mp3` (titles and order in `src/content/songs.ts`; placeholder piano plays until they're added) |
+| Photos (5) | Supabase Storage + the `photos` table (see [supabase.md](supabase.md)); placeholders in `public/assets/images/`, places described in `src/content/photos.ts` |
+| Songs | Supabase Storage + the `songs` table (see [supabase.md](supabase.md)); without it, `PLAYLIST` in `src/content/songs.ts` and `public/assets/music/` (placeholder piano plays when nothing else can) |
 | When each line appears | the scene files in `src/scenes/` (`at` / `out`) |
 | How the world looks along the way | `src/three/timeline.ts` |
 | Scene order and length | `src/scenes/config.ts` |
 
 In `text.ts`, `\n` makes a designed line break, `*words*` are set in italics, and a trailing 🩷 is drawn as a small soft pink heart.
 
-Components never build file paths themselves. They call `getPhotoUrl` / `getSongUrl` in `src/utils/assets.ts`, which is the only file to change when the assets move to Supabase Storage (see [supabase.md](supabase.md)).
+Components never build file paths themselves. They call `getPhotoUrl` / `getSongUrl` in `src/utils/assets.ts`, the only place that knows whether a file comes from Supabase or from `public/`.
 
 ## Deploying to GitHub Pages
 
@@ -46,13 +46,17 @@ The site must be **built** before it's served. Serving the repository files dire
 
 The workflow sets `BASE_PATH=/<repo-name>/` so every asset URL works under `https://<user>.github.io/<repo-name>/`. Other hosts that serve from `/` need no setting.
 
+## Going live
+
+Photos and songs come from Supabase. The whole checklist (SQL to run, where to upload, how to check) is in **[supabase.md](supabase.md)**.
+
 ## Environment variables
 
-None are needed yet. When Supabase is added, create a `.env.local` (already git-ignored):
+| Name | Value |
+|------|-------|
+| `VITE_SUPABASE_URL` | Supabase Project URL |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | Supabase publishable / anon key |
 
-```env
-VITE_SUPABASE_URL=
-VITE_SUPABASE_ANON_KEY=
-```
+Both are public by design and committed in `.env.production`, which every build (including GitHub Pages) reads. `npm run dev` doesn't read it and uses the placeholders in `public/`; to develop against Supabase, put the same two lines in `.env.local` (git-ignored). Without them the site uses the files in `public/`.
 
-Never commit `.env` files or the Supabase service-role key.
+Never put the Supabase secret / service-role key in this repository or the site.

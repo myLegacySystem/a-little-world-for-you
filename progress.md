@@ -115,18 +115,22 @@ Add `?debug` to the URL to expose the live world state as `window.__world` in th
 
 Portrait 4:5 works best; about 1200–1600px on the long edge, JPEG quality ~80. Use `focus` in `photos.ts` (CSS `object-position`) to keep the important part in frame.
 
-Songs: add `perfect.mp3` and `i-wanna-be-yours.mp3` to `public/assets/music/` — they play automatically, first in order. More songs: add an entry in `songs.ts` and to `PLAYLIST`. Once the real songs are in, the placeholder pieces (`song-01…04.mp3`, `PLACEHOLDER_*`, `FALLBACK_PLAYLIST`) can be deleted.
+The real photos and songs go to Supabase: upload them and they replace these places (see `supabase.md`); the files in `public/` stay as the fallback.
 
-Note on copyright: these are commercial recordings. If the repository or site is public, committing the MP3s republishes them. Prefer a private Supabase Storage bucket with signed URLs (see `supabase.md`), or keep the repo private.
+Songs: the `songs` table is the playlist. Without Supabase, `PLAYLIST` in `songs.ts` expects `perfect.mp3` and `i-wanna-be-yours.mp3` in `public/assets/music/`. The placeholder piano (`song-01…04.mp3`, `FALLBACK_PLAYLIST`) plays only when nothing else can.
 
-## Supabase later (not implemented)
+Note on copyright: these are commercial recordings. Don't commit the MP3s to this public repository; keep them in Supabase Storage.
 
-1. Upload to a `birthday-assets` bucket (`photos/`, `songs/`) — see `supabase.md`.
-2. Add `VITE_SUPABASE_URL` (and `VITE_SUPABASE_ANON_KEY` if using signed URLs) to `.env.local`.
-3. Change only `getPhotoUrl` / `getSongUrl` in `src/utils/assets.ts` to return Storage URLs (examples in the file's header comment).
-4. Optionally build `PHOTOS` / `PLAYLIST` from the `photos` / `songs` tables instead of the local objects; components don't change.
+## Supabase (live content)
 
-The audio element already uses `crossOrigin="anonymous"` so Web Audio (fades, underwater filter) keeps working with Storage URLs.
+Steps to go live: [supabase.md](supabase.md). Setup SQL: `supabase/setup.sql`.
+
+- `src/utils/supabase.ts` reads tables over the REST API with plain `fetch` (no client library) and builds public Storage URLs. Config: `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY` in `.env.production` (public values; read by every build, not by `npm run dev`).
+- `loadAssets()` in `src/utils/assets.ts` runs before the first render (`main.tsx`): `photos` rows fill the five places by `sort_order`; `songs` rows become the playlist. Anything missing, unreadable, or slower than 5 s falls back to `public/`.
+- The audio engine picks its playlist when the music first starts (`getPlaylist()`), after that load.
+- Tested against a local mock of the REST and Storage endpoints (publishable and legacy JWT keys, partial tables, odd file paths, a missing song, Supabase down, a hanging server), and the SQL against Postgres 16 (re-runnable; the anon role reads active rows only and can't write). Not yet run against the real project.
+
+The audio element and photo loaders use `crossOrigin="anonymous"`, so Web Audio (fades, underwater filter) and WebGL textures work with Storage URLs.
 
 ## Important decisions
 
@@ -148,7 +152,7 @@ The audio element already uses `crossOrigin="anonymous"` so Web Audio (fades, un
 
 ## Known issues / remaining
 
-- **Real content needed:** her five photos, and the MP3s for "Perfect" and "I Wanna Be Yours" (titles are already set). Until the MP3s exist, the browser console shows two harmless "failed to load" lines for them and the placeholder piano plays. Optionally a small line above the title (`BIRTHDAY_EYEBROW`), e.g. the date.
+- **Real content needed:** her five photos, and the MP3s for "Perfect" and "I Wanna Be Yours", uploaded to Supabase (see supabase.md). Until then the placeholders show and play. Optionally a small line above the title (`BIRTHDAY_EYEBROW`), e.g. the date.
 - `MEMORIES_01` ("Some moments stay with me.") and the photo captions (`i.`, `ii.`) are placeholder copy I added; change or empty them in `text.ts`.
 - The placeholder photos are soft gradients; the photo treatments (print, cinema crop, soft focus) will look best once real photos are in. Check `focus` for the eyes photo especially.
 - Tested in headless Chromium (software WebGL) at 1280×800 and 390×844. Worth a final check on a real iPhone (Safari) and Android before sharing.

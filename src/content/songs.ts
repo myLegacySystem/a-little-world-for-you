@@ -1,23 +1,33 @@
 /**
  * The playlist. Only soft songs.
  *
- * To add a song: put the MP3 in /public/assets/music/ with the file name given
- * in `localPath` (or change the path), and it plays — no other changes. The
- * player consumes these objects through getSongUrl() in utils/assets.ts, so
- * moving the files to Supabase later needs no UI changes.
+ * With Supabase configured, the `songs` table is the playlist (see
+ * supabase.md) and PLAYLIST below is used only when that table is empty or
+ * can't be read.
  *
- * A song whose file isn't there yet is skipped quietly. If none of PLAYLIST
+ * Locally: put the MP3 in /public/assets/music/ with the file name given in
+ * `localPath` (or change the path), and it plays — no other changes. The
+ * player consumes these objects through getSongUrl() in utils/assets.ts.
+ *
+ * A song whose file isn't there is skipped quietly. If none of the playlist
  * can be played, the soft placeholder piano pieces play instead.
  */
 
-export interface Song {
-  /** Stable identifier (also the Supabase object name later). */
+export type Song = {
+  /** Stable identifier. */
   id: string;
   title: string;
   artist?: string;
-  /** Path under /public. */
-  localPath: string;
-}
+} & (
+  | {
+      /** Path under /public. */
+      localPath: string;
+    }
+  | {
+      /** Object path in the Supabase bucket (songs from the `songs` table). */
+      storagePath: string;
+    }
+);
 
 export const SONGS = {
   SONG_01: { id: 'perfect', title: 'Perfect', artist: 'Ed Sheeran', localPath: '/assets/music/perfect.mp3' },
