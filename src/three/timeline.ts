@@ -87,8 +87,8 @@ const KEYS: Key[] = [
   ['memories', 0, { heartLight: 0.2 }],
   ['memories', 1, { dolly: 3 }],
 
-  // HER EYES → OCEAN — the heart dissolves; water rises over everything;
-  // her eyes surface in it, and we're pulled in through them.
+  // HER EYES → OCEAN — the heart dissolves; water rises over everything,
+  // and we're pulled into the sea.
   ['eyes', 0.06, {}],
   ['eyes', 0.12, { ocean: 0.08, sea: 0.1, burst: 1, glass: 0.75 }],
   ['eyes', 0.24, { ocean: 0.45, sea: 0.55, glass: 0.1, dark: 0.2, color: 0.85, heartLight: 0 }],

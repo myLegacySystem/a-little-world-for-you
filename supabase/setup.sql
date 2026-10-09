@@ -74,8 +74,8 @@ where s.active and s.file_path !~ '^https?://'
 -- file-name order (for camera names like IMG_20261009_121118.jpg, the order
 -- they were taken). sort_order is the place in the story:
 --   1 Memories, the larger print      2 Memories, the smaller print
---   3 Her eyes, seen through water (a close portrait works best)
 --   4 Her soul, warm light and petals 5 The birthday, the last one she sees
+-- (3 was her eyes and is no longer shown.)
 -- To move a photo, change its sort_order in Table Editor → photos.
 with files as (
   select o.name, row_number() over (order by o.name) as k
@@ -89,7 +89,7 @@ with files as (
 ),
 places as (
   select n as sort_order, row_number() over (order by n) as k
-  from generate_series(1, 5) as n
+  from unnest(array[1, 2, 4, 5]) as n
   where not exists (select 1 from public.photos p where p.active and p.sort_order = n)
 )
 insert into public.photos (file_path, sort_order)

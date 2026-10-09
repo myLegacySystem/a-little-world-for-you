@@ -3,7 +3,7 @@ import type { Photo as PhotoData } from '../content/photos';
 import { getPhotoUrl } from '../utils/assets';
 import { removeWorldPhoto, setWorldPhoto } from '../utils/photoAnchor';
 
-type Variant = 'print' | 'cinema' | 'soft';
+type Variant = 'print' | 'soft';
 
 interface PhotoProps {
   photo: PhotoData;
@@ -20,9 +20,8 @@ interface PhotoProps {
 
 /**
  * A photograph as an object in the world, not a gallery card:
- *   print  — a small printed photo with a cream border, a tilt and a shadow
- *   cinema — a wide, edge-faded crop that fills the frame
- *   soft   — a floating portrait with dissolving edges
+ *   print — a small printed photo with a cream border, a tilt and a shadow
+ *   soft  — a floating portrait with dissolving edges
  * It rises out of soft focus as it arrives and only loads when it's near.
  *
  * When WebGL is running, the photograph is drawn inside the 3D world instead
@@ -40,7 +39,6 @@ export function Photo({ photo, visible, variant = 'print', caption, className = 
       key,
       el: frame.current,
       url: getPhotoUrl(photo),
-      mode: variant === 'cinema' ? 'water' : 'print',
       visible: Math.min(1, Math.max(0, visible)),
       tilt,
     });

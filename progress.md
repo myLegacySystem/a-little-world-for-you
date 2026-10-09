@@ -10,7 +10,7 @@ Built on top of the first version — same stack, content files, scroll director
 
 **The heart** is discovered: dust → pink light → particles gather → shape → glass forms → in its own scene we drift closer while it breathes → it dissolves into the sea → it reforms at the end, beside the final photograph.
 
-**Photographs in the world** (`three/Memories.ts`, `utils/photoAnchor.ts`): photos are now drawn by WebGL as real objects where their layout box is. They materialise from glowing specks, sit on cream print paper with grain and a soft shadow, float slightly and lean toward the pointer. Her eyes are seen through moving water and dissolve as we're pulled in. The DOM `<img>` stays (invisible) for alt text and as the fallback without WebGL. Textures load only near the screen and are disposed when removed.
+**Photographs in the world** (`three/Memories.ts`, `utils/photoAnchor.ts`): photos are now drawn by WebGL as real objects where their layout box is. They materialise from glowing specks, sit on cream print paper with grain and a soft shadow, float slightly and lean toward the pointer. The DOM `<img>` stays (invisible) for alt text and as the fallback without WebGL. Textures load only near the screen and are disposed when removed.
 
 **Particles**: depth-of-field bokeh away from the heart's plane, travel with the camera, drift softly away from the mouse (desktop only), rose tints, stars that stay visible on light skies as tiny gold/rose lights.
 
@@ -39,7 +39,7 @@ Placeholder photos and songs are in use. Real ones can be dropped in without tou
 | 1 | `OpeningScene` | Grey dust drifting. The quiet lines arrive on their own. At "And then you came into my life." the dust starts to gather. |
 | 2 | `ColorScene` | **Wow 1:** watercolor blooms out of the heart, one hue at a time: baby blue → blush → lavender → buttercream → mint → warm light. **Wow 2:** the particles gather into the heart, gain color, and the pink glass heart emerges. |
 | 3 | `MemoriesScene` | Two photos set down like prints; the heart rests beside them. |
-| 4 | `EyesScene` | **Wow 3:** the heart dissolves; its particles swirl out and become the sea, which rises over everything. Her eyes surface in the water, and the camera is pulled in through them. Music becomes softly muffled underwater. |
+| 4 | `EyesScene` | **Wow 3:** the heart dissolves; its particles swirl out and become the sea, which rises over everything. The words carry us forward, and the camera is pulled into the sea. (The photo of her eyes seen through the water was removed.) Music becomes softly muffled underwater. |
 | 5 | `FallScene` | Deeper and calmer; particles rise past as we sink. |
 | 6 | `QuoteScene` | Natalie Newman's quote in deep water (stars reflected on it at "the sparkle in her eyes"), then the afterword. **Wow 4:** the particles rise and become stars as the sea darkens into a twilight sky. |
 | 7 | `DreamsScene` | Night sky; each wish lights a star in a small constellation. |
@@ -53,7 +53,7 @@ Placeholder photos and songs are in use. Real ones can be dropped in without tou
 src/
   content/
     text.ts        Every user-facing string (TEXT.*). The only place to change wording.
-    photos.ts      PHOTOS.PHOTO_01…05 — id, localPath, alt, focus, role
+    photos.ts      PHOTOS.PHOTO_01, 02, 04, 05 — id, place, localPath, alt, focus, role
     songs.ts       SONGS.SONG_01…04, PLAYLIST, DEFAULT_VOLUME
   scenes/
     config.ts      Scene order + lengths (screen heights). Single source for scroll + world.
@@ -76,7 +76,7 @@ src/
   utils/           assets (resolvers), scroll (director), heartAnchor, device, experience, math
   styles/global.css
 public/assets/
-  images/          photo-01.jpg … photo-05.jpg (placeholders)
+  images/          photo-01, 02, 04, 05.jpg (placeholders)
   music/           song-01.mp3 … song-04.mp3 (placeholder piano, see CREDITS.md)
 ```
 
@@ -109,7 +109,6 @@ Add `?debug` to the URL to expose the live world state as `window.__world` in th
 |---|---|---|---|
 | `PHOTO_01` | photo-01.jpg | Memories, the larger print | Any photo you love |
 | `PHOTO_02` | photo-02.jpg | Memories, the smaller print | A second moment |
-| `PHOTO_03` | photo-03.jpg | Eyes: wide crop seen through water, then you're pulled in | A close portrait, eyes near the centre |
 | `PHOTO_04` | photo-04.jpg | Soul: print with petals and a sprig | Warm, candid, sunlit |
 | `PHOTO_05` | photo-05.jpg | Birthday: stays with the heart at the end | The one she should see last |
 
@@ -126,7 +125,7 @@ Note on copyright: these are commercial recordings. Don't commit the MP3s to thi
 Steps to go live: [supabase.md](supabase.md). Setup SQL: `supabase/setup.sql`.
 
 - `src/utils/supabase.ts` reads tables over the REST API with plain `fetch` (no client library) and builds public Storage URLs. Config: `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY` in `.env.production` (public values; read by every build, not by `npm run dev`).
-- `loadAssets()` in `src/utils/assets.ts` runs before the first render (`main.tsx`): `photos` rows fill the five places by `sort_order`; `songs` rows become the playlist. Anything missing, unreadable, or slower than 5 s falls back to `public/`.
+- `loadAssets()` in `src/utils/assets.ts` runs before the first render (`main.tsx`): `photos` rows fill the four places by `sort_order` (= `place` in `photos.ts`: 1, 2, 4, 5); `songs` rows become the playlist. Anything missing, unreadable, or slower than 5 s falls back to `public/`.
 - The audio engine picks its playlist when the music first starts (`getPlaylist()`), after that load.
 - Tested against a local mock of the REST and Storage endpoints (publishable and legacy JWT keys, partial tables, odd file paths, a missing song, Supabase down, a hanging server), and the SQL against Postgres 16 with stand-ins for Supabase's storage tables (rows built from the uploaded files, re-runnable, stale rows switched off; the anon role reads active rows only and can't write). Not yet run against the real project.
 
@@ -152,8 +151,8 @@ The audio element and photo loaders use `crossOrigin="anonymous"`, so Web Audio 
 
 ## Known issues / remaining
 
-- **Real content needed:** her five photos, and the MP3s for "Perfect" and "I Wanna Be Yours", uploaded to Supabase (see supabase.md). Until then the placeholders show and play. Optionally a small line above the title (`BIRTHDAY_EYEBROW`), e.g. the date.
+- **Real content:** her photos and songs are in Supabase (see supabase.md); the placeholders in `public/` are only the fallback. Optionally a small line above the title (`BIRTHDAY_EYEBROW`), e.g. the date.
 - `MEMORIES_01` ("Some moments stay with me.") and the photo captions (`i.`, `ii.`) are placeholder copy I added; change or empty them in `text.ts`.
-- The placeholder photos are soft gradients; the photo treatments (print, cinema crop, soft focus) will look best once real photos are in. Check `focus` for the eyes photo especially.
+- Check `focus` in `photos.ts` against the real photos so the crops keep faces in frame.
 - Tested in headless Chromium (software WebGL) at 1280×800 and 390×844. Worth a final check on a real iPhone (Safari) and Android before sharing.
 - Placeholder music: four soft piano pieces rendered from the Salamander Grand Piano samples (CC BY 3.0); credit in `public/assets/music/CREDITS.md`. Remove that file when the real songs replace them.

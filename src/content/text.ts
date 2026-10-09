@@ -114,7 +114,6 @@ export const TEXT = {
   // ── Photo descriptions (read aloud by screen readers) ───────────────────
   PHOTO_01_ALT: 'A memory of her',
   PHOTO_02_ALT: 'Another memory of her',
-  PHOTO_03_ALT: 'Her eyes',
   PHOTO_04_ALT: 'Her, in warm light',
   PHOTO_05_ALT: 'Her, on her birthday',
 
